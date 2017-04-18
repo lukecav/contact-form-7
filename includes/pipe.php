@@ -1,6 +1,6 @@
 <?php
 
-class WPCF7_Pipe {
+class WPCF8_Pipe {
 
 	public $before = '';
 	public $after = '';
@@ -19,7 +19,7 @@ class WPCF7_Pipe {
 	}
 }
 
-class WPCF7_Pipes {
+class wpcf8_Pipes {
 
 	private $pipes = array();
 
@@ -30,7 +30,7 @@ class WPCF7_Pipes {
 	}
 
 	private function add_pipe( $text ) {
-		$pipe = new WPCF7_Pipe( $text );
+		$pipe = new wpcf8_Pipe( $text );
 		$this->pipes[] = $pipe;
 	}
 
@@ -69,11 +69,10 @@ class WPCF7_Pipes {
 	}
 
 	public function random_pipe() {
-		if ( $this->zero() )
+		if ( $this->zero() ) {
 			return null;
+		}
 
 		return $this->pipes[array_rand( $this->pipes )];
 	}
 }
-
-?>
