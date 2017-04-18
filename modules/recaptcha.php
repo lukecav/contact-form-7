@@ -1,6 +1,6 @@
 <?php
 
-class WPCF7_RECAPTCHA extends WPCF7_Service {
+class WPCF8_RECAPTCHA extends WPCF8_Service {
 
 	const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
@@ -16,7 +16,7 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	}
 
 	private function __construct() {
-		$this->sitekeys = WPCF7::get_option( 'recaptcha' );
+		$this->sitekeys = wpcf8::get_option( 'recaptcha' );
 	}
 
 	public function get_title() {
@@ -34,12 +34,6 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	}
 
 	public function icon() {
-		$icon = sprintf(
-			'<img src="%1$s" alt="%2$s" width="%3$d" height="%4$d" class="icon" />',
-			wpcf7_plugin_url( 'images/service-icons/recaptcha-72x72.png' ),
-			esc_attr( __( 'reCAPTCHA Logo', 'contact-form-7' ) ),
-			36, 36 );
-		echo $icon;
 	}
 
 	public function link() {
@@ -99,7 +93,7 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	private function menu_page_url( $args = '' ) {
 		$args = wp_parse_args( $args, array() );
 
-		$url = menu_page_url( 'wpcf7-integration', false );
+		$url = menu_page_url( 'wpcf8-integration', false );
 		$url = add_query_arg( array( 'service' => 'recaptcha' ), $url );
 
 		if ( ! empty( $args) ) {
@@ -112,17 +106,17 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	public function load( $action = '' ) {
 		if ( 'setup' == $action ) {
 			if ( 'POST' == $_SERVER['REQUEST_METHOD'] ) {
-				check_admin_referer( 'wpcf7-recaptcha-setup' );
+				check_admin_referer( 'wpcf8-recaptcha-setup' );
 
 				$sitekey = isset( $_POST['sitekey'] ) ? trim( $_POST['sitekey'] ) : '';
 				$secret = isset( $_POST['secret'] ) ? trim( $_POST['secret'] ) : '';
 
 				if ( $sitekey && $secret ) {
-					WPCF7::update_option( 'recaptcha', array( $sitekey => $secret ) );
+					wpcf8::update_option( 'recaptcha', array( $sitekey => $secret ) );
 					$redirect_to = $this->menu_page_url( array(
 						'message' => 'success' ) );
 				} elseif ( '' === $sitekey && '' === $secret ) {
-					WPCF7::update_option( 'recaptcha', null );
+					wpcf8::update_option( 'recaptcha', null );
 					$redirect_to = $this->menu_page_url( array(
 						'message' => 'success' ) );
 				} else {
@@ -173,7 +167,7 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 </tr>
 <tr>
 	<th scope="row"><?php echo esc_html( __( 'Secret Key', 'contact-form-7' ) ); ?></th>
-	<td class="code"><?php echo esc_html( wpcf7_mask_password( $secret ) ); ?></td>
+	<td class="code"><?php echo esc_html( wpcf8_mask_password( $secret ) ); ?></td>
 </tr>
 </tbody>
 </table>
@@ -187,7 +181,7 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 
 <p><a href="<?php echo esc_url( $this->menu_page_url( 'action=setup' ) ); ?>" class="button"><?php echo esc_html( __( "Configure Keys", 'contact-form-7' ) ); ?></a></p>
 
-<p><?php echo sprintf( esc_html( __( "For more details, see %s.", 'contact-form-7' ) ), wpcf7_link( __( 'http://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) ) ); ?></p>
+<p><?php echo sprintf( esc_html( __( "For more details, see %s.", 'contact-form-7' ) ), wpcf8_link( __( 'https://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) ) ); ?></p>
 <?php
 		}
 	}
@@ -195,7 +189,7 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	public function display_setup() {
 ?>
 <form method="post" action="<?php echo esc_url( $this->menu_page_url( 'action=setup' ) ); ?>">
-<?php wp_nonce_field( 'wpcf7-recaptcha-setup' ); ?>
+<?php wp_nonce_field( 'wpcf8-recaptcha-setup' ); ?>
 <table class="form-table">
 <tbody>
 <tr>
@@ -215,10 +209,10 @@ class WPCF7_RECAPTCHA extends WPCF7_Service {
 	}
 }
 
-add_action( 'wpcf7_init', 'wpcf7_recaptcha_register_service' );
+add_action( 'wpcf8_init', 'wpcf8_recaptcha_register_service' );
 
-function wpcf7_recaptcha_register_service() {
-	$integration = WPCF7_Integration::get_instance();
+function wpcf8_recaptcha_register_service() {
+	$integration = wpcf8_Integration::get_instance();
 
 	$categories = array(
 		'captcha' => __( 'CAPTCHA', 'contact-form-7' ) );
@@ -228,16 +222,16 @@ function wpcf7_recaptcha_register_service() {
 	}
 
 	$services = array(
-		'recaptcha' => WPCF7_RECAPTCHA::get_instance() );
+		'recaptcha' => wpcf8_RECAPTCHA::get_instance() );
 
 	foreach ( $services as $name => $service ) {
 		$integration->add_service( $name, $service );
 	}
 }
 
-add_action( 'wpcf7_enqueue_scripts', 'wpcf7_recaptcha_enqueue_scripts' );
+add_action( 'wpcf8_enqueue_scripts', 'wpcf8_recaptcha_enqueue_scripts' );
 
-function wpcf7_recaptcha_enqueue_scripts() {
+function wpcf8_recaptcha_enqueue_scripts() {
 	$url = 'https://www.google.com/recaptcha/api.js';
 	$url = add_query_arg( array(
 		'onload' => 'recaptchaCallback',
@@ -246,15 +240,16 @@ function wpcf7_recaptcha_enqueue_scripts() {
 	wp_register_script( 'google-recaptcha', $url, array(), '2.0', true );
 }
 
-add_action( 'wp_footer', 'wpcf7_recaptcha_callback_script' );
+add_action( 'wp_footer', 'wpcf8_recaptcha_callback_script' );
 
-function wpcf7_recaptcha_callback_script() {
+function wpcf8_recaptcha_callback_script() {
 	if ( ! wp_script_is( 'google-recaptcha', 'enqueued' ) ) {
 		return;
 	}
 
 ?>
 <script type="text/javascript">
+var recaptchaWidgets = [];
 var recaptchaCallback = function() {
 	var forms = document.getElementsByTagName('form');
 	var pattern = /(^|\s)g-recaptcha(\s|$)/;
@@ -266,16 +261,28 @@ var recaptchaCallback = function() {
 			var sitekey = divs[j].getAttribute('data-sitekey');
 
 			if (divs[j].className && divs[j].className.match(pattern) && sitekey) {
-				grecaptcha.render(divs[j], {
+				var params = {
 					'sitekey': sitekey,
 					'theme': divs[j].getAttribute('data-theme'),
 					'type': divs[j].getAttribute('data-type'),
 					'size': divs[j].getAttribute('data-size'),
-					'tabindex': divs[j].getAttribute('data-tabindex'),
-					'callback': divs[j].getAttribute('data-callback'),
-					'expired-callback': divs[j].getAttribute('data-expired-callback')
-				});
+					'tabindex': divs[j].getAttribute('data-tabindex')
+				};
 
+				var callback = divs[j].getAttribute('data-callback');
+
+				if (callback && 'function' == typeof window[callback]) {
+					params['callback'] = window[callback];
+				}
+
+				var expired_callback = divs[j].getAttribute('data-expired-callback');
+
+				if (expired_callback && 'function' == typeof window[expired_callback]) {
+					params['expired-callback'] = window[expired_callback];
+				}
+
+				var widget_id = grecaptcha.render(divs[j], params);
+				recaptchaWidgets.push(widget_id);
 				break;
 			}
 		}
@@ -285,24 +292,28 @@ var recaptchaCallback = function() {
 <?php
 }
 
-add_action( 'wpcf7_init', 'wpcf7_recaptcha_add_shortcode_recaptcha' );
+add_action( 'wpcf8_init', 'wpcf8_recaptcha_add_form_tag_recaptcha' );
 
-function wpcf7_recaptcha_add_shortcode_recaptcha() {
-	$recaptcha = WPCF7_RECAPTCHA::get_instance();
+function wpcf8_recaptcha_add_form_tag_recaptcha() {
+	$recaptcha = wpcf8_RECAPTCHA::get_instance();
 
 	if ( $recaptcha->is_active() ) {
-		wpcf7_add_shortcode( 'recaptcha', 'wpcf7_recaptcha_shortcode_handler' );
+		wpcf8_add_form_tag( 'recaptcha', 'wpcf8_recaptcha_form_tag_handler' );
 	}
 }
 
-function wpcf7_recaptcha_shortcode_handler( $tag ) {
+function wpcf8_recaptcha_form_tag_handler( $tag ) {
+	if ( ! wp_script_is( 'google-recaptcha', 'registered' ) ) {
+		wpcf8_recaptcha_enqueue_scripts();
+	}
+
 	wp_enqueue_script( 'google-recaptcha' );
 
-	$tag = new WPCF7_Shortcode( $tag );
+	$tag = new wpcf8_FormTag( $tag );
 
 	$atts = array();
 
-	$recaptcha = WPCF7_RECAPTCHA::get_instance();
+	$recaptcha = wpcf8_RECAPTCHA::get_instance();
 	$atts['data-sitekey'] = $recaptcha->get_sitekey();
 	$atts['data-theme'] = $tag->get_option( 'theme', '(dark|light)', true );
 	$atts['data-type'] = $tag->get_option( 'type', '(audio|image)', true );
@@ -310,20 +321,21 @@ function wpcf7_recaptcha_shortcode_handler( $tag ) {
 	$atts['data-tabindex'] = $tag->get_option( 'tabindex', 'int', true );
 	$atts['data-callback'] = $tag->get_option( 'callback', '', true );
 	$atts['data-expired-callback'] =
-		$tag->get_option( 'expired-callback', '', true );
+		$tag->get_option( 'expired_callback', '', true );
 
 	$atts['class'] = $tag->get_class_option(
-		wpcf7_form_controls_class( $tag->type, 'g-recaptcha' ) );
+		wpcf8_form_controls_class( $tag->type, 'g-recaptcha' ) );
 	$atts['id'] = $tag->get_id_option();
 
-	$html = sprintf( '<div %1$s></div>', wpcf7_format_atts( $atts ) );
-	$html .= wpcf7_recaptcha_noscript(
+	$html = sprintf( '<div %1$s></div>', wpcf8_format_atts( $atts ) );
+	$html .= wpcf8_recaptcha_noscript(
 		array( 'sitekey' => $atts['data-sitekey'] ) );
+	$html = sprintf( '<div class="wpcf8-form-control-wrap">%s</div>', $html );
 
 	return $html;
 }
 
-function wpcf7_recaptcha_noscript( $args = '' ) {
+function wpcf8_recaptcha_noscript( $args = '' ) {
 	$args = wp_parse_args( $args, array(
 		'sitekey' => '' ) );
 
@@ -355,56 +367,55 @@ function wpcf7_recaptcha_noscript( $args = '' ) {
 	return ob_get_clean();
 }
 
-add_filter( 'wpcf7_spam', 'wpcf7_recaptcha_check_with_google', 9 );
+add_filter( 'wpcf8_spam', 'wpcf8_recaptcha_check_with_google', 9 );
 
-function wpcf7_recaptcha_check_with_google( $spam ) {
+function wpcf8_recaptcha_check_with_google( $spam ) {
 	if ( $spam ) {
 		return $spam;
 	}
 
-	$contact_form = wpcf7_get_current_contact_form();
+	$contact_form = wpcf8_get_current_contact_form();
 
 	if ( ! $contact_form ) {
 		return $spam;
 	}
 
-	$tags = $contact_form->form_scan_shortcode( array( 'type' => 'recaptcha' ) );
+	$tags = $contact_form->scan_form_tags( array( 'type' => 'recaptcha' ) );
 
 	if ( empty( $tags ) ) {
 		return $spam;
 	}
 
-	$recaptcha = WPCF7_RECAPTCHA::get_instance();
+	$recaptcha = wpcf8_RECAPTCHA::get_instance();
 
 	if ( ! $recaptcha->is_active() ) {
 		return $spam;
 	}
 
-	$response_token = isset( $_POST['g-recaptcha-response'] )
-		? $_POST['g-recaptcha-response'] : '';
+	$response_token = wpcf8_recaptcha_response();
 	$spam = ! $recaptcha->verify( $response_token );
 
 	return $spam;
 }
 
-add_action( 'wpcf7_admin_init', 'wpcf7_add_tag_generator_recaptcha', 45 );
+add_action( 'wpcf8_admin_init', 'wpcf8_add_tag_generator_recaptcha', 45 );
 
-function wpcf7_add_tag_generator_recaptcha() {
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+function wpcf8_add_tag_generator_recaptcha() {
+	$tag_generator = wpcf8_TagGenerator::get_instance();
 	$tag_generator->add( 'recaptcha', __( 'reCAPTCHA', 'contact-form-7' ),
-		'wpcf7_tag_generator_recaptcha', array( 'nameless' => 1 ) );
+		'wpcf8_tag_generator_recaptcha', array( 'nameless' => 1 ) );
 }
 
-function wpcf7_tag_generator_recaptcha( $contact_form, $args = '' ) {
+function wpcf8_tag_generator_recaptcha( $contact_form, $args = '' ) {
 	$args = wp_parse_args( $args, array() );
 
-	$recaptcha = WPCF7_RECAPTCHA::get_instance();
+	$recaptcha = wpcf8_RECAPTCHA::get_instance();
 
 	if ( ! $recaptcha->is_active() ) {
 ?>
 <div class="control-box">
 <fieldset>
-<legend><?php echo sprintf( esc_html( __( "To use reCAPTCHA, first you need to install an API key pair. For more details, see %s.", 'contact-form-7' ) ), wpcf7_link( __( 'http://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) ) ); ?></legend>
+<legend><?php echo sprintf( esc_html( __( "To use reCAPTCHA, first you need to install an API key pair. For more details, see %s.", 'contact-form-7' ) ), wpcf8_link( __( 'https://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) ) ); ?></legend>
 </fieldset>
 </div>
 <?php
@@ -414,7 +425,7 @@ function wpcf7_tag_generator_recaptcha( $contact_form, $args = '' ) {
 
 	$description = __( "Generate a form-tag for a reCAPTCHA widget. For more details, see %s.", 'contact-form-7' );
 
-	$desc_link = wpcf7_link( __( 'http://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) );
+	$desc_link = wpcf8_link( __( 'https://contactform7.com/recaptcha/', 'contact-form-7' ), __( 'reCAPTCHA', 'contact-form-7' ) );
 
 ?>
 <div class="control-box">
@@ -470,4 +481,12 @@ function wpcf7_tag_generator_recaptcha( $contact_form, $args = '' ) {
 	</div>
 </div>
 <?php
+}
+
+function wpcf8_recaptcha_response() {
+	if ( isset( $_POST['g-recaptcha-response'] ) ) {
+		return $_POST['g-recaptcha-response'];
+	}
+
+	return false;
 }
