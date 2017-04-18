@@ -1,6 +1,6 @@
 <?php
 
-class WPCF7_Submission {
+class WPCF8_Submission {
 
 	private static $instance;
 
@@ -15,7 +15,7 @@ class WPCF7_Submission {
 
 	private function __construct() {}
 
-	public static function get_instance( WPCF7_ContactForm $contact_form = null ) {
+	public static function get_instance( wpcf8_ContactForm $contact_form = null ) {
 		if ( empty( self::$instance ) ) {
 			if ( null == $contact_form ) {
 				return null;
@@ -74,7 +74,7 @@ class WPCF7_Submission {
 		$posted_data = array_diff_key( $posted_data, array( '_wpnonce' => '' ) );
 		$posted_data = $this->sanitize_posted_data( $posted_data );
 
-		$tags = $this->contact_form->form_scan_shortcode();
+		$tags = $this->contact_form->scan_form_tags();
 
 		foreach ( (array) $tags as $tag ) {
 			if ( empty( $tag['name'] ) ) {
@@ -90,8 +90,8 @@ class WPCF7_Submission {
 
 			$pipes = $tag['pipes'];
 
-			if ( WPCF7_USE_PIPE
-			&& $pipes instanceof WPCF7_Pipes
+			if ( wpcf8_USE_PIPE
+			&& $pipes instanceof wpcf8_Pipes
 			&& ! $pipes->zero() ) {
 				if ( is_array( $value) ) {
 					$new_value = array();
@@ -109,7 +109,7 @@ class WPCF7_Submission {
 			$posted_data[$name] = $value;
 		}
 
-		$this->posted_data = apply_filters( 'wpcf7_posted_data', $posted_data );
+		$this->posted_data = apply_filters( 'wpcf8_posted_data', $posted_data );
 
 		return $this->posted_data;
 	}
@@ -131,14 +131,15 @@ class WPCF7_Submission {
 		}
 
 		$this->meta = array(
-			'remote_ip' => preg_replace( '/[^0-9a-f.:, ]/', '',
-				$_SERVER['REMOTE_ADDR'] ),
-			'user_agent' => substr( $_SERVER['HTTP_USER_AGENT'], 0, 254 ),
+			'remote_ip' => $this->get_remote_ip_addr(),
+			'user_agent' => isset( $_SERVER['HTTP_USER_AGENT'] )
+				? substr( $_SERVER['HTTP_USER_AGENT'], 0, 254 ) : '',
 			'url' => preg_replace( '%(?<!:|/)/.*$%', '',
-				untrailingslashit( home_url() ) ) . wpcf7_get_request_uri(),
+				untrailingslashit( home_url() ) ) . wpcf8_get_request_uri(),
 			'timestamp' => current_time( 'timestamp' ),
-			'unit_tag' => isset( $_POST['_wpcf7_unit_tag'] )
-				? $_POST['_wpcf7_unit_tag'] : '' );
+			'unit_tag' =>
+				isset( $_POST['_wpcf8_unit_tag'] ) ? $_POST['_wpcf8_unit_tag'] : '',
+		);
 
 		$contact_form = $this->contact_form;
 
@@ -158,13 +159,13 @@ class WPCF7_Submission {
 			$this->status = 'mail_sent';
 			$this->response = $contact_form->message( 'mail_sent_ok' );
 
-			do_action( 'wpcf7_mail_sent', $contact_form );
+			do_action( 'wpcf8_mail_sent', $contact_form );
 
 		} else {
 			$this->status = 'mail_failed';
 			$this->response = $contact_form->message( 'mail_sent_ng' );
 
-			do_action( 'wpcf7_mail_failed', $contact_form );
+			do_action( 'wpcf8_mail_failed', $contact_form );
 		}
 
 		$this->remove_uploaded_files();
@@ -172,22 +173,31 @@ class WPCF7_Submission {
 		return $this->status;
 	}
 
+	private function get_remote_ip_addr() {
+		if ( isset( $_SERVER['REMOTE_ADDR'] )
+		&& WP_Http::is_ip_address( $_SERVER['REMOTE_ADDR'] ) ) {
+			return $_SERVER['REMOTE_ADDR'];
+		}
+
+		return '';
+	}
+
 	private function validate() {
 		if ( $this->invalid_fields ) {
 			return false;
 		}
 
-		require_once WPCF7_PLUGIN_DIR . '/includes/validation.php';
-		$result = new WPCF7_Validation();
+		require_once wpcf8_PLUGIN_DIR . '/includes/validation.php';
+		$result = new wpcf8_Validation();
 
-		$tags = $this->contact_form->form_scan_shortcode();
+		$tags = $this->contact_form->scan_form_tags();
 
 		foreach ( $tags as $tag ) {
-			$result = apply_filters( 'wpcf7_validate_' . $tag['type'],
-				$result, $tag );
+			$type = $tag['type'];
+			$result = apply_filters( "wpcf8_validate_{$type}", $result, $tag );
 		}
 
-		$result = apply_filters( 'wpcf7_validate', $result, $tags );
+		$result = apply_filters( 'wpcf8_validate', $result, $tags );
 
 		$this->invalid_fields = $result->get_invalid_fields();
 
@@ -195,7 +205,7 @@ class WPCF7_Submission {
 	}
 
 	private function accepted() {
-		return apply_filters( 'wpcf7_acceptance', true );
+		return apply_filters( 'wpcf8_acceptance', true );
 	}
 
 	private function spam() {
@@ -207,7 +217,7 @@ class WPCF7_Submission {
 			$spam = true;
 		}
 
-		if ( WPCF7_VERIFY_NONCE && ! $this->verify_nonce() ) {
+		if ( wpcf8_VERIFY_NONCE && ! $this->verify_nonce() ) {
 			$spam = true;
 		}
 
@@ -215,21 +225,21 @@ class WPCF7_Submission {
 			$spam = true;
 		}
 
-		return apply_filters( 'wpcf7_spam', $spam );
+		return apply_filters( 'wpcf8_spam', $spam );
 	}
 
 	private function verify_nonce() {
-		return wpcf7_verify_nonce( $_POST['_wpnonce'], $this->contact_form->id() );
+		return wpcf8_verify_nonce( $_POST['_wpnonce'], $this->contact_form->id() );
 	}
 
 	private function blacklist_check() {
-		$target = wpcf7_array_flatten( $this->posted_data );
+		$target = wpcf8_array_flatten( $this->posted_data );
 		$target[] = $this->get_meta( 'remote_ip' );
 		$target[] = $this->get_meta( 'user_agent' );
 
 		$target = implode( "\n", $target );
 
-		return wpcf7_blacklist_check( $target );
+		return wpcf8_blacklist_check( $target );
 	}
 
 	/* Mail */
@@ -237,16 +247,16 @@ class WPCF7_Submission {
 	private function mail() {
 		$contact_form = $this->contact_form;
 
-		do_action( 'wpcf7_before_send_mail', $contact_form );
+		do_action( 'wpcf8_before_send_mail', $contact_form );
 
 		$skip_mail = $this->skip_mail || ! empty( $contact_form->skip_mail );
-		$skip_mail = apply_filters( 'wpcf7_skip_mail', $skip_mail, $contact_form );
+		$skip_mail = apply_filters( 'wpcf8_skip_mail', $skip_mail, $contact_form );
 
 		if ( $skip_mail ) {
 			return true;
 		}
 
-		$result = WPCF7_Mail::send( $contact_form->prop( 'mail' ), 'mail' );
+		$result = wpcf8_Mail::send( $contact_form->prop( 'mail' ), 'mail' );
 
 		if ( $result ) {
 			$additional_mail = array();
@@ -255,11 +265,11 @@ class WPCF7_Submission {
 				$additional_mail['mail_2'] = $mail_2;
 			}
 
-			$additional_mail = apply_filters( 'wpcf7_additional_mail',
+			$additional_mail = apply_filters( 'wpcf8_additional_mail',
 				$additional_mail, $contact_form );
 
 			foreach ( $additional_mail as $name => $template ) {
-				WPCF7_Mail::send( $template, $name );
+				wpcf8_Mail::send( $template, $name );
 			}
 
 			return true;
@@ -282,7 +292,7 @@ class WPCF7_Submission {
 
 	public function remove_uploaded_files() {
 		foreach ( (array) $this->uploaded_files as $name => $path ) {
-			@unlink( $path );
+			wpcf8_rmdir_p( $path );
 			@rmdir( dirname( $path ) ); // remove parent dir if it's removable (empty).
 		}
 	}
