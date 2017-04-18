@@ -62,16 +62,16 @@ For more information, see [Releases](https://contactform7.com/category/releases/
 
 * Added REST API custom endpoints to manipulate contact form data.
 * Config Validator: Added test items for field names and attachment file paths.
-* Added custom DOM events: `wpcf7invalid`, `wpcf7spam`, `wpcf7mailsent`, `wpcf7mailfailed` and `wpcf7submit`.
-* New action hook: `wpcf7_after_flamingo`.
+* Added custom DOM events: `wpcf8invalid`, `wpcf8spam`, `wpcf8mailsent`, `wpcf8mailfailed` and `wpcf8submit`.
+* New action hook: `wpcf8_after_flamingo`.
 * Added `size` option to `select` and `select*` form-tag types.
-* Made it possible to use the 3rd parameter of `wpcf7_add_form_tag()` to specify "features" of the form-tag type.
+* Made it possible to use the 3rd parameter of `wpcf8_add_form_tag()` to specify "features" of the form-tag type.
 
 = 4.6.1 =
 
 * Fixed: "0" input could pass the `minlength` validation.
 * Fixed: `exclude_blank` option was applied to all mail fields, not only to the message body.
-* Fixed: `wpcf7_autop()` incorrectly inserted `<br />` around hidden and block-type form-tags.
+* Fixed: `wpcf8_autop()` incorrectly inserted `<br />` around hidden and block-type form-tags.
 * Fixed: Applying `strtolower()` to uploaded file names was unnecessary and could cause troubles in a non-English environment.
 
 = 4.6 =
@@ -81,5 +81,5 @@ For more information, see [Releases](https://contactform7.com/category/releases/
 * `[_serial_number]` special mail-tag.
 * New form-tag type for hidden fields.
 * `default:shortcode_attr` form-tag option.
-* `WPCF7_Shortcode`, `WPCF7_ShortcodeManager`, `wpcf7_add_shortcode()`, `wpcf7_scan_shortcode()`, and some other classes and functions have become deprecated.
-* Removed all language files from the _languages_ folder. Translations have moved to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/contact-form-7).
+* `WPCF8_Shortcode`, `WPCF8_ShortcodeManager`, `wpcf8_add_shortcode()`, `wpcf8_scan_shortcode()`, and some other classes and functions have become deprecated.
+* Removed all language files from the _languages_ folder. Translations have moved to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/contact-form-8).
