@@ -17,6 +17,6 @@ function wpcf8_admin_has_edit_cap() {
 }
 
 function wpcf8_add_tag_generator( $name, $title, $elm_id, $callback, $options = array() ) {
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+	$tag_generator = WPCF8_TagGenerator::get_instance();
 	return $tag_generator->add( $name, $title, $callback, $options );
 }
