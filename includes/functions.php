@@ -5,7 +5,7 @@ function wpcf8_plugin_path( $path = '' ) {
 }
 
 function wpcf8_plugin_url( $path = '' ) {
-	$url = plugins_url( $path, wpcf8_PLUGIN );
+	$url = plugins_url( $path, WPCF8_PLUGIN );
 
 	if ( is_ssl() && 'http:' == substr( $url, 0, 5 ) ) {
 		$url = 'https:' . substr( $url, 5 );
