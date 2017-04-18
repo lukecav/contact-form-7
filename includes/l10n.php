@@ -14,7 +14,7 @@ function wpcf8_l10n() {
 	require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
 
 	$api = translations_api( 'plugins', array(
-		'slug' => 'contact-form-7',
+		'slug' => 'contact-form-8',
 		'version' => wpcf8_VERSION,
 	) );
 
@@ -63,7 +63,7 @@ function wpcf8_is_rtl( $locale = '' ) {
 function wpcf8_load_textdomain( $locale = null ) {
 	global $l10n;
 
-	$domain = 'contact-form-7';
+	$domain = 'contact-form-8';
 
 	if ( get_locale() == $locale ) {
 		$locale = null;
