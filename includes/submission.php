@@ -187,7 +187,7 @@ class WPCF8_Submission {
 			return false;
 		}
 
-		require_once wpcf8_PLUGIN_DIR . '/includes/validation.php';
+		require_once WPCF8_PLUGIN_DIR . '/includes/validation.php';
 		$result = new wpcf8_Validation();
 
 		$tags = $this->contact_form->scan_form_tags();
