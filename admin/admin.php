@@ -286,7 +286,7 @@ function wpcf8_admin_enqueue_scripts( $hook_suffix ) {
 
 	wp_enqueue_style( 'contact-form-8-admin',
 		wpcf8_plugin_url( 'admin/css/styles.css' ),
-		array(), WPCF_VERSION, 'all' );
+		array(), WPCF8_VERSION, 'all' );
 
 	if ( wpcf8_is_rtl() ) {
 		wp_enqueue_style( 'contact-form-8-admin-rtl',
