@@ -1,6 +1,6 @@
 <?php
 
-class WPCF7_ContactFormTemplate {
+class WPCF8_ContactFormTemplate {
 
 	public static function get_default( $prop = 'form' ) {
 		if ( 'form' == $prop ) {
@@ -15,45 +15,57 @@ class WPCF7_ContactFormTemplate {
 			$template = null;
 		}
 
-		return apply_filters( 'wpcf7_default_template', $template, $prop );
+		return apply_filters( 'wpcf8_default_template', $template, $prop );
 	}
 
 	public static function form() {
-		$template =
-			'<p>' . __( 'Your Name', 'contact-form-7' )
-			. ' ' . __( '(required)', 'contact-form-7' ) . '<br />' . "\n"
-			. '    [text* your-name] </p>' . "\n\n"
-			. '<p>' . __( 'Your Email', 'contact-form-7' )
-			. ' ' . __( '(required)', 'contact-form-7' ) . '<br />' . "\n"
-			. '    [email* your-email] </p>' . "\n\n"
-			. '<p>' . __( 'Subject', 'contact-form-7' ) . '<br />' . "\n"
-			. '    [text your-subject] </p>' . "\n\n"
-			. '<p>' . __( 'Your Message', 'contact-form-7' ) . '<br />' . "\n"
-			. '    [textarea your-message] </p>' . "\n\n"
-			. '<p>[submit "' . __( 'Send', 'contact-form-7' ) . '"]</p>';
+		$template = sprintf(
+			'
+<label> %2$s %1$s
+    [text* your-name] </label>
 
-		return $template;
+<label> %3$s %1$s
+    [email* your-email] </label>
+
+<label> %4$s
+    [text your-subject] </label>
+
+<label> %5$s
+    [textarea your-message] </label>
+
+[submit "%6$s"]',
+			__( '(required)', 'contact-form-8' ),
+			__( 'Your Name', 'contact-form-8' ),
+			__( 'Your Email', 'contact-form-8' ),
+			__( 'Subject', 'contact-form-8' ),
+			__( 'Your Message', 'contact-form-8' ),
+			__( 'Send', 'contact-form-8' ) );
+
+		return trim( $template );
 	}
 
 	public static function mail() {
 		$template = array(
-			'subject' => '[your-subject]',
+			'subject' => sprintf(
+				_x( '%1$s "%2$s"', 'mail subject', 'contact-form-8' ),
+				get_bloginfo( 'name' ), '[your-subject]' ),
 			'sender' => sprintf( '[your-name] <%s>', self::from_email() ),
 			'body' =>
-				sprintf( __( 'From: %s', 'contact-form-7' ),
+				sprintf( __( 'From: %s', 'contact-form-8' ),
 					'[your-name] <[your-email]>' ) . "\n"
-				. sprintf( __( 'Subject: %s', 'contact-form-7' ),
+				. sprintf( __( 'Subject: %s', 'contact-form-8' ),
 					'[your-subject]' ) . "\n\n"
-				. __( 'Message Body:', 'contact-form-7' )
+				. __( 'Message Body:', 'contact-form-8' )
 					. "\n" . '[your-message]' . "\n\n"
-				. '--' . "\n"
+				. '-- ' . "\n"
 				. sprintf( __( 'This e-mail was sent from a contact form on %1$s (%2$s)',
-					'contact-form-7' ), get_bloginfo( 'name' ), get_bloginfo( 'url' ) ),
+					'contact-form-8' ), get_bloginfo( 'name' ), get_bloginfo( 'url' ) ),
 			'recipient' => get_option( 'admin_email' ),
 			'additional_headers' => 'Reply-To: [your-email]',
 			'attachments' => '',
 			'use_html' => 0,
-			'exclude_blank' => 0 );
+			'exclude_blank' => 0,
+		);
 
 		return $template;
 	}
@@ -61,21 +73,24 @@ class WPCF7_ContactFormTemplate {
 	public static function mail_2() {
 		$template = array(
 			'active' => false,
-			'subject' => '[your-subject]',
+			'subject' => sprintf(
+				_x( '%1$s "%2$s"', 'mail subject', 'contact-form-8' ),
+				get_bloginfo( 'name' ), '[your-subject]' ),
 			'sender' => sprintf( '%s <%s>',
 				get_bloginfo( 'name' ), self::from_email() ),
 			'body' =>
-				__( 'Message Body:', 'contact-form-7' )
+				__( 'Message Body:', 'contact-form-8' )
 					. "\n" . '[your-message]' . "\n\n"
-				. '--' . "\n"
+				. '-- ' . "\n"
 				. sprintf( __( 'This e-mail was sent from a contact form on %1$s (%2$s)',
-					'contact-form-7' ), get_bloginfo( 'name' ), get_bloginfo( 'url' ) ),
+					'contact-form-8' ), get_bloginfo( 'name' ), get_bloginfo( 'url' ) ),
 			'recipient' => '[your-email]',
 			'additional_headers' => sprintf( 'Reply-To: %s',
 				get_option( 'admin_email' ) ),
 			'attachments' => '',
 			'use_html' => 0,
-			'exclude_blank' => 0 );
+			'exclude_blank' => 0,
+		);
 
 		return $template;
 	}
@@ -84,7 +99,7 @@ class WPCF7_ContactFormTemplate {
 		$admin_email = get_option( 'admin_email' );
 		$sitename = strtolower( $_SERVER['SERVER_NAME'] );
 
-		if ( wpcf7_is_localhost() ) {
+		if ( wpcf8_is_localhost() ) {
 			return $admin_email;
 		}
 
@@ -102,7 +117,7 @@ class WPCF7_ContactFormTemplate {
 	public static function messages() {
 		$messages = array();
 
-		foreach ( wpcf7_messages() as $key => $arr ) {
+		foreach ( wpcf8_messages() as $key => $arr ) {
 			$messages[$key] = $arr['default'];
 		}
 
@@ -110,64 +125,64 @@ class WPCF7_ContactFormTemplate {
 	}
 }
 
-function wpcf7_messages() {
+function wpcf8_messages() {
 	$messages = array(
 		'mail_sent_ok' => array(
 			'description'
-				=> __( "Sender's message was sent successfully", 'contact-form-7' ),
+				=> __( "Sender's message was sent successfully", 'contact-form-8' ),
 			'default'
-				=> __( 'Your message was sent successfully. Thanks.', 'contact-form-7' )
+				=> __( "Thank you for your message. It has been sent.", 'contact-form-8' ),
 		),
 
 		'mail_sent_ng' => array(
 			'description'
-				=> __( "Sender's message was failed to send", 'contact-form-7' ),
+				=> __( "Sender's message failed to send", 'contact-form-8' ),
 			'default'
-				=> __( 'Failed to send your message. Please try later or contact the administrator by another method.', 'contact-form-7' )
+				=> __( "There was an error trying to send your message. Please try again later.", 'contact-form-8' ),
 		),
 
 		'validation_error' => array(
 			'description'
-				=> __( "Validation errors occurred", 'contact-form-7' ),
+				=> __( "Validation errors occurred", 'contact-form-8' ),
 			'default'
-				=> __( 'Validation errors occurred. Please confirm the fields and submit it again.', 'contact-form-7' )
+				=> __( "One or more fields have an error. Please check and try again.", 'contact-form-8' ),
 		),
 
 		'spam' => array(
 			'description'
-				=> __( "Submission was referred to as spam", 'contact-form-7' ),
+				=> __( "Submission was referred to as spam", 'contact-form-8' ),
 			'default'
-				=> __( 'Failed to send your message. Please try later or contact the administrator by another method.', 'contact-form-7' )
+				=> __( "There was an error trying to send your message. Please try again later.", 'contact-form-8' ),
 		),
 
 		'accept_terms' => array(
 			'description'
-				=> __( "There are terms that the sender must accept", 'contact-form-7' ),
+				=> __( "There are terms that the sender must accept", 'contact-form-8' ),
 			'default'
-				=> __( 'Please accept the terms to proceed.', 'contact-form-7' )
+				=> __( "You must accept the terms and conditions before sending your message.", 'contact-form-8' ),
 		),
 
 		'invalid_required' => array(
 			'description'
-				=> __( "There is a field that the sender must fill in", 'contact-form-7' ),
+				=> __( "There is a field that the sender must fill in", 'contact-form-8' ),
 			'default'
-				=> __( 'Please fill in the required field.', 'contact-form-7' )
+				=> __( "The field is required.", 'contact-form-8' ),
 		),
 
 		'invalid_too_long' => array(
 			'description'
-				=> __( "There is a field that the user input is longer than the maximum allowed length", 'contact-form-7' ),
+				=> __( "There is a field with input that is longer than the maximum allowed length", 'contact-form-8' ),
 			'default'
-				=> __( 'This input is too long.', 'contact-form-7' )
+				=> __( "The field is too long.", 'contact-form-8' ),
 		),
 
 		'invalid_too_short' => array(
 			'description'
-				=> __( "There is a field that the user input is shorter than the minimum allowed length", 'contact-form-7' ),
+				=> __( "There is a field with input that is shorter than the minimum allowed length", 'contact-form-8' ),
 			'default'
-				=> __( 'This input is too short.', 'contact-form-7' )
+				=> __( "The field is too short.", 'contact-form-8' ),
 		)
 	);
 
-	return apply_filters( 'wpcf7_messages', $messages );
+	return apply_filters( 'wpcf8_messages', $messages );
 }
