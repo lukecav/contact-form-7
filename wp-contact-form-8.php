@@ -2,9 +2,9 @@
 /*
 Plugin Name: Contact Form 8
 Plugin URI: https://github.com/lukecav/contact-form-8/
-Description: Just another contact form plugin. Simple but flexible.
-Author: Takayuki Miyoshi
-Author URI: http://ideasilo.wordpress.com/
+Description: Just another forked contact form plugin. Simple but flexible.
+Author: Luke Cavanagh
+Author URI: https://github.com/lukecav
 Text Domain: contact-form-8
 Domain Path: /languages/
 Version: 4.7
