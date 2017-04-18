@@ -355,7 +355,7 @@ function wpcf8_admin_management_page() {
 		return;
 	}
 
-	$list_table = new wpcf8_Contact_Form_List_Table();
+	$list_table = new WPCF8_Contact_Form_List_Table();
 	$list_table->prepare_items();
 
 ?>
