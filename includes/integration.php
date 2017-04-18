@@ -1,6 +1,6 @@
 <?php
 
-class WPCF7_Integration {
+class WPCF8_Integration {
 
 	private static $instance;
 
@@ -17,7 +17,7 @@ class WPCF7_Integration {
 		return self::$instance;
 	}
 
-	public function add_service( $name, WPCF7_Service $service ) {
+	public function add_service( $name, wpcf8_Service $service ) {
 		$name = sanitize_key( $name );
 
 		if ( empty( $name ) || isset( $this->services[$name] ) ) {
@@ -55,7 +55,8 @@ class WPCF7_Integration {
 
 	public function list_services( $args = '' ) {
 		$args = wp_parse_args( $args, array(
-			'include' => array() ) );
+			'include' => array(),
+		) );
 
 		$singular = false;
 		$services = (array) $this->services;
@@ -73,7 +74,7 @@ class WPCF7_Integration {
 			return;
 		}
 
-		$action = wpcf7_current_action();
+		$action = wpcf8_current_action();
 
 		foreach ( $services as $name => $service ) {
 			$cats = array_intersect_key( $this->categories,
@@ -81,7 +82,7 @@ class WPCF7_Integration {
 ?>
 <div class="card<?php echo $service->is_active() ? ' active' : ''; ?>" id="<?php echo esc_attr( $name ); ?>">
 <?php $service->icon(); ?>
-<h3 class="title"><?php echo esc_html( $service->get_title() ); ?></h3>
+<h2 class="title"><?php echo esc_html( $service->get_title() ); ?></h2>
 <div class="infobox">
 <?php echo esc_html( implode( ', ', $cats ) ); ?>
 <br />
@@ -105,7 +106,7 @@ class WPCF7_Integration {
 
 }
 
-abstract class WPCF7_Service {
+abstract class wpcf8_Service {
 
 	abstract public function get_title();
 	abstract public function is_active();
