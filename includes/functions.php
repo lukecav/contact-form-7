@@ -1,11 +1,11 @@
 <?php
 
-function wpcf7_plugin_path( $path = '' ) {
-	return path_join( WPCF7_PLUGIN_DIR, trim( $path, '/' ) );
+function wpcf8_plugin_path( $path = '' ) {
+	return path_join( wpcf8_PLUGIN_DIR, trim( $path, '/' ) );
 }
 
-function wpcf7_plugin_url( $path = '' ) {
-	$url = plugins_url( $path, WPCF7_PLUGIN );
+function wpcf8_plugin_url( $path = '' ) {
+	$url = plugins_url( $path, wpcf8_PLUGIN );
 
 	if ( is_ssl() && 'http:' == substr( $url, 0, 5 ) ) {
 		$url = 'https:' . substr( $url, 5 );
@@ -14,39 +14,35 @@ function wpcf7_plugin_url( $path = '' ) {
 	return $url;
 }
 
-function wpcf7_upload_dir( $type = false ) {
-	$uploads = wp_upload_dir();
+function wpcf8_upload_dir( $type = false ) {
+	$uploads = wp_get_upload_dir();
 
-	$uploads = apply_filters( 'wpcf7_upload_dir', array(
+	$uploads = apply_filters( 'wpcf8_upload_dir', array(
 		'dir' => $uploads['basedir'],
 		'url' => $uploads['baseurl'] ) );
 
-	if ( 'dir' == $type )
+	if ( 'dir' == $type ) {
 		return $uploads['dir'];
-	if ( 'url' == $type )
+	} if ( 'url' == $type ) {
 		return $uploads['url'];
+	}
 
 	return $uploads;
 }
 
-function wpcf7_ajax_loader() {
-	$url = wpcf7_plugin_url( 'images/ajax-loader.gif' );
-
-	return apply_filters( 'wpcf7_ajax_loader', $url );
-}
-
-function wpcf7_verify_nonce( $nonce, $action = -1 ) {
-	if ( substr( wp_hash( $action, 'nonce' ), -12, 10 ) == $nonce )
+function wpcf8_verify_nonce( $nonce, $action = -1 ) {
+	if ( substr( wp_hash( $action, 'nonce' ), -12, 10 ) == $nonce ) {
 		return true;
+	}
 
 	return false;
 }
 
-function wpcf7_create_nonce( $action = -1 ) {
+function wpcf8_create_nonce( $action = -1 ) {
 	return substr( wp_hash( $action, 'nonce' ), -12, 10 );
 }
 
-function wpcf7_blacklist_check( $target ) {
+function wpcf8_blacklist_check( $target ) {
 	$mod_keys = trim( get_option( 'blacklist_keys' ) );
 
 	if ( empty( $mod_keys ) ) {
@@ -72,50 +68,58 @@ function wpcf7_blacklist_check( $target ) {
 	return false;
 }
 
-function wpcf7_array_flatten( $input ) {
-	if ( ! is_array( $input ) )
+function wpcf8_array_flatten( $input ) {
+	if ( ! is_array( $input ) ) {
 		return array( $input );
+	}
 
 	$output = array();
 
-	foreach ( $input as $value )
-		$output = array_merge( $output, wpcf7_array_flatten( $value ) );
+	foreach ( $input as $value ) {
+		$output = array_merge( $output, wpcf8_array_flatten( $value ) );
+	}
 
 	return $output;
 }
 
-function wpcf7_flat_join( $input ) {
-	$input = wpcf7_array_flatten( $input );
+function wpcf8_flat_join( $input ) {
+	$input = wpcf8_array_flatten( $input );
 	$output = array();
 
-	foreach ( (array) $input as $value )
+	foreach ( (array) $input as $value ) {
 		$output[] = trim( (string) $value );
+	}
 
 	return implode( ', ', $output );
 }
 
-function wpcf7_support_html5() {
-	return (bool) apply_filters( 'wpcf7_support_html5', true );
+function wpcf8_support_html5() {
+	return (bool) apply_filters( 'wpcf8_support_html5', true );
 }
 
-function wpcf7_support_html5_fallback() {
-	return (bool) apply_filters( 'wpcf7_support_html5_fallback', false );
+function wpcf8_support_html5_fallback() {
+	return (bool) apply_filters( 'wpcf8_support_html5_fallback', false );
 }
 
-function wpcf7_use_really_simple_captcha() {
-	return apply_filters( 'wpcf7_use_really_simple_captcha',
-		WPCF7_USE_REALLY_SIMPLE_CAPTCHA );
+function wpcf8_use_really_simple_captcha() {
+	return apply_filters( 'wpcf8_use_really_simple_captcha',
+		wpcf8_USE_REALLY_SIMPLE_CAPTCHA );
 }
 
-function wpcf7_load_js() {
-	return apply_filters( 'wpcf7_load_js', WPCF7_LOAD_JS );
+function wpcf8_validate_configuration() {
+	return apply_filters( 'wpcf8_validate_configuration',
+		wpcf8_VALIDATE_CONFIGURATION );
 }
 
-function wpcf7_load_css() {
-	return apply_filters( 'wpcf7_load_css', WPCF7_LOAD_CSS );
+function wpcf8_load_js() {
+	return apply_filters( 'wpcf8_load_js', wpcf8_LOAD_JS );
 }
 
-function wpcf7_format_atts( $atts ) {
+function wpcf8_load_css() {
+	return apply_filters( 'wpcf8_load_css', wpcf8_LOAD_CSS );
+}
+
+function wpcf8_format_atts( $atts ) {
 	$html = '';
 
 	$prioritized_atts = array( 'type', 'name', 'value' );
@@ -147,14 +151,15 @@ function wpcf7_format_atts( $atts ) {
 	return $html;
 }
 
-function wpcf7_link( $url, $anchor_text, $args = '' ) {
+function wpcf8_link( $url, $anchor_text, $args = '' ) {
 	$defaults = array(
 		'id' => '',
-		'class' => '' );
+		'class' => '',
+	);
 
 	$args = wp_parse_args( $args, $defaults );
 	$args = array_intersect_key( $args, $defaults );
-	$atts = wpcf7_format_atts( $args );
+	$atts = wpcf8_format_atts( $args );
 
 	$link = sprintf( '<a href="%1$s"%3$s>%2$s</a>',
 		esc_url( $url ),
@@ -164,7 +169,7 @@ function wpcf7_link( $url, $anchor_text, $args = '' ) {
 	return $link;
 }
 
-function wpcf7_get_request_uri() {
+function wpcf8_get_request_uri() {
 	static $request_uri = '';
 
 	if ( empty( $request_uri ) ) {
@@ -174,16 +179,16 @@ function wpcf7_get_request_uri() {
 	return esc_url_raw( $request_uri );
 }
 
-function wpcf7_register_post_types() {
-	if ( class_exists( 'WPCF7_ContactForm' ) ) {
-		WPCF7_ContactForm::register_post_type();
+function wpcf8_register_post_types() {
+	if ( class_exists( 'wpcf8_ContactForm' ) ) {
+		wpcf8_ContactForm::register_post_type();
 		return true;
 	} else {
 		return false;
 	}
 }
 
-function wpcf7_version( $args = '' ) {
+function wpcf8_version( $args = '' ) {
 	$defaults = array(
 		'limit' => -1,
 		'only_major' => false );
@@ -196,7 +201,7 @@ function wpcf7_version( $args = '' ) {
 
 	$args['limit'] = (int) $args['limit'];
 
-	$ver = WPCF7_VERSION;
+	$ver = wpcf8_VERSION;
 	$ver = strtr( $ver, '_-+', '...' );
 	$ver = preg_replace( '/[^0-9.]+/', ".$0.", $ver );
 	$ver = preg_replace( '/[.]+/', ".", $ver );
@@ -212,13 +217,13 @@ function wpcf7_version( $args = '' ) {
 	return $ver;
 }
 
-function wpcf7_version_grep( $version, array $input ) {
+function wpcf8_version_grep( $version, array $input ) {
 	$pattern = '/^' . preg_quote( (string) $version, '/' ) . '(?:\.|$)/';
 
 	return preg_grep( $pattern, $input );
 }
 
-function wpcf7_enctype_value( $enctype ) {
+function wpcf8_enctype_value( $enctype ) {
 	$enctype = trim( $enctype );
 
 	if ( empty( $enctype ) ) {
@@ -228,7 +233,8 @@ function wpcf7_enctype_value( $enctype ) {
 	$valid_enctypes = array(
 		'application/x-www-form-urlencoded',
 		'multipart/form-data',
-		'text/plain' );
+		'text/plain',
+	);
 
 	if ( in_array( $enctype, $valid_enctypes ) ) {
 		return $enctype;
@@ -243,10 +249,19 @@ function wpcf7_enctype_value( $enctype ) {
 	return '';
 }
 
-function wpcf7_rmdir_p( $dir ) {
+function wpcf8_rmdir_p( $dir ) {
 	if ( is_file( $dir ) ) {
-		@unlink( $dir );
-		return true;
+		if ( ! $result = @unlink( $dir ) ) {
+			$stat = @stat( $dir );
+			$perms = $stat['mode'];
+			@chmod( $dir, $perms | 0200 ); // add write for owner
+
+			if ( ! $result = @unlink( $dir ) ) {
+				@chmod( $dir, $perms );
+			}
+		}
+
+		return $result;
 	}
 
 	if ( ! is_dir( $dir ) ) {
@@ -259,7 +274,7 @@ function wpcf7_rmdir_p( $dir ) {
 				continue;
 			}
 
-			wpcf7_rmdir_p( path_join( $dir, $file ) );
+			wpcf8_rmdir_p( path_join( $dir, $file ) );
 		}
 
 		closedir( $handle );
@@ -269,7 +284,7 @@ function wpcf7_rmdir_p( $dir ) {
 }
 
 /* From _http_build_query in wp-includes/functions.php */
-function wpcf7_build_query( $args, $key = '' ) {
+function wpcf8_build_query( $args, $key = '' ) {
 	$sep = '&';
 	$ret = array();
 
@@ -287,7 +302,7 @@ function wpcf7_build_query( $args, $key = '' ) {
 		}
 
 		if ( is_array( $v ) || is_object( $v ) ) {
-			array_push( $ret, wpcf7_build_query( $v, $k ) );
+			array_push( $ret, wpcf8_build_query( $v, $k ) );
 		} else {
 			array_push( $ret, $k . '=' . urlencode( $v ) );
 		}
@@ -303,7 +318,7 @@ function wpcf7_build_query( $args, $key = '' ) {
  *
  * @return int|bool The number of code units, or false if mb_convert_encoding is not available.
  */
-function wpcf7_count_code_units( $string ) {
+function wpcf8_count_code_units( $string ) {
 	static $use_mb = null;
 
 	if ( is_null( $use_mb ) ) {
@@ -329,7 +344,19 @@ function wpcf7_count_code_units( $string ) {
 	return floor( $byte_count / 2 );
 }
 
-function wpcf7_is_localhost() {
+function wpcf8_is_localhost() {
 	$server_name = strtolower( $_SERVER['SERVER_NAME'] );
 	return in_array( $server_name, array( 'localhost', '127.0.0.1' ) );
+}
+
+function wpcf8_deprecated_function( $function, $version, $replacement ) {
+	$trigger_error = apply_filters( 'deprecated_function_trigger_error', true );
+
+	if ( WP_DEBUG && $trigger_error ) {
+		if ( function_exists( '__' ) ) {
+			trigger_error( sprintf( __( '%1$s is <strong>deprecated</strong> since Contact Form 7 version %2$s! Use %3$s instead.', 'contact-form-7' ), $function, $version, $replacement ) );
+		} else {
+			trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since Contact Form 7 version %2$s! Use %3$s instead.', $function, $version, $replacement ) );
+		}
+	}
 }
