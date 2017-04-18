@@ -545,7 +545,7 @@ add_action( 'wpcf8_admin_warnings', 'wpcf8_old_wp_version_error' );
 function wpcf8_old_wp_version_error() {
 	$wp_version = get_bloginfo( 'version' );
 
-	if ( ! version_compare( $wp_version, wpcf8_REQUIRED_WP_VERSION, '<' ) ) {
+	if ( ! version_compare( $wp_version, WPCF8_REQUIRED_WP_VERSION, '<' ) ) {
 		return;
 	}
 
