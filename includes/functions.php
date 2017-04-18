@@ -1,7 +1,7 @@
 <?php
 
 function wpcf8_plugin_path( $path = '' ) {
-	return path_join( wpcf8_PLUGIN_DIR, trim( $path, '/' ) );
+	return path_join( WPCF8_PLUGIN_DIR, trim( $path, '/' ) );
 }
 
 function wpcf8_plugin_url( $path = '' ) {
