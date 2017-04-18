@@ -3,28 +3,28 @@
 ** A base module for [file] and [file*]
 **/
 
-/* Shortcode handler */
+/* form_tag handler */
 
-add_action( 'wpcf7_init', 'wpcf7_add_shortcode_file' );
+add_action( 'wpcf8_init', 'wpcf8_add_form_tag_file' );
 
-function wpcf7_add_shortcode_file() {
-	wpcf7_add_shortcode( array( 'file', 'file*' ),
-		'wpcf7_file_shortcode_handler', true );
+function wpcf8_add_form_tag_file() {
+	wpcf8_add_form_tag( array( 'file', 'file*' ),
+		'wpcf8_file_form_tag_handler', array( 'name-attr' => true ) );
 }
 
-function wpcf7_file_shortcode_handler( $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_file_form_tag_handler( $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
 	if ( empty( $tag->name ) ) {
 		return '';
 	}
 
-	$validation_error = wpcf7_get_validation_error( $tag->name );
+	$validation_error = wpcf8_get_validation_error( $tag->name );
 
-	$class = wpcf7_form_controls_class( $tag->type );
+	$class = wpcf8_form_controls_class( $tag->type );
 
 	if ( $validation_error ) {
-		$class .= ' wpcf7-not-valid';
+		$class .= ' wpcf8-not-valid';
 	}
 
 	$atts = array();
@@ -43,10 +43,10 @@ function wpcf7_file_shortcode_handler( $tag ) {
 	$atts['type'] = 'file';
 	$atts['name'] = $tag->name;
 
-	$atts = wpcf7_format_atts( $atts );
+	$atts = wpcf8_format_atts( $atts );
 
 	$html = sprintf(
-		'<span class="wpcf7-form-control-wrap %1$s"><input %2$s />%3$s</span>',
+		'<span class="wpcf8-form-control-wrap %1$s"><input %2$s />%3$s</span>',
 		sanitize_html_class( $tag->name ), $atts, $validation_error );
 
 	return $html;
@@ -55,10 +55,10 @@ function wpcf7_file_shortcode_handler( $tag ) {
 
 /* Encode type filter */
 
-add_filter( 'wpcf7_form_enctype', 'wpcf7_file_form_enctype_filter' );
+add_filter( 'wpcf8_form_enctype', 'wpcf8_file_form_enctype_filter' );
 
-function wpcf7_file_form_enctype_filter( $enctype ) {
-	$multipart = (bool) wpcf7_scan_shortcode( array( 'type' => array( 'file', 'file*' ) ) );
+function wpcf8_file_form_enctype_filter( $enctype ) {
+	$multipart = (bool) wpcf8_scan_form_tags( array( 'type' => array( 'file', 'file*' ) ) );
 
 	if ( $multipart ) {
 		$enctype = 'multipart/form-data';
@@ -70,11 +70,11 @@ function wpcf7_file_form_enctype_filter( $enctype ) {
 
 /* Validation + upload handling filter */
 
-add_filter( 'wpcf7_validate_file', 'wpcf7_file_validation_filter', 10, 2 );
-add_filter( 'wpcf7_validate_file*', 'wpcf7_file_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_file', 'wpcf8_file_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_file*', 'wpcf8_file_validation_filter', 10, 2 );
 
-function wpcf7_file_validation_filter( $result, $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_file_validation_filter( $result, $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
 	$name = $tag->name;
 	$id = $tag->get_id_option();
@@ -82,17 +82,18 @@ function wpcf7_file_validation_filter( $result, $tag ) {
 	$file = isset( $_FILES[$name] ) ? $_FILES[$name] : null;
 
 	if ( $file['error'] && UPLOAD_ERR_NO_FILE != $file['error'] ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'upload_failed_php_error' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'upload_failed_php_error' ) );
 		return $result;
 	}
 
 	if ( empty( $file['tmp_name'] ) && $tag->is_required() ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'invalid_required' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'invalid_required' ) );
 		return $result;
 	}
 
-	if ( ! is_uploaded_file( $file['tmp_name'] ) )
+	if ( ! is_uploaded_file( $file['tmp_name'] ) ) {
 		return $result;
+	}
 
 	$allowed_file_types = array();
 
@@ -124,10 +125,11 @@ function wpcf7_file_validation_filter( $result, $tag ) {
 				if ( ! empty( $matches[2] ) ) {
 					$kbmb = strtolower( $matches[2] );
 
-					if ( 'kb' == $kbmb )
+					if ( 'kb' == $kbmb ) {
 						$allowed_size *= 1024;
-					elseif ( 'mb' == $kbmb )
+					} elseif ( 'mb' == $kbmb ) {
 						$allowed_size *= 1024 * 1024;
+					}
 				}
 
 				break;
@@ -138,46 +140,47 @@ function wpcf7_file_validation_filter( $result, $tag ) {
 	/* File type validation */
 
 	// Default file-type restriction
-	if ( '' == $file_type_pattern )
+	if ( '' == $file_type_pattern ) {
 		$file_type_pattern = 'jpg|jpeg|png|gif|pdf|doc|docx|ppt|pptx|odt|avi|ogg|m4a|mov|mp3|mp4|mpg|wav|wmv';
+	}
 
 	$file_type_pattern = trim( $file_type_pattern, '|' );
 	$file_type_pattern = '(' . $file_type_pattern . ')';
 	$file_type_pattern = '/\.' . $file_type_pattern . '$/i';
 
 	if ( ! preg_match( $file_type_pattern, $file['name'] ) ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'upload_file_type_invalid' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'upload_file_type_invalid' ) );
 		return $result;
 	}
 
 	/* File size validation */
 
 	if ( $file['size'] > $allowed_size ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'upload_file_too_large' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'upload_file_too_large' ) );
 		return $result;
 	}
 
-	wpcf7_init_uploads(); // Confirm upload dir
-	$uploads_dir = wpcf7_upload_tmp_dir();
-	$uploads_dir = wpcf7_maybe_add_random_dir( $uploads_dir );
+	wpcf8_init_uploads(); // Confirm upload dir
+	$uploads_dir = wpcf8_upload_tmp_dir();
+	$uploads_dir = wpcf8_maybe_add_random_dir( $uploads_dir );
 
 	$filename = $file['name'];
-	$filename = wpcf7_canonicalize( $filename );
+	$filename = wpcf8_canonicalize( $filename, 'as-is' );
 	$filename = sanitize_file_name( $filename );
-	$filename = wpcf7_antiscript_file_name( $filename );
+	$filename = wpcf8_antiscript_file_name( $filename );
 	$filename = wp_unique_filename( $uploads_dir, $filename );
 
 	$new_file = trailingslashit( $uploads_dir ) . $filename;
 
 	if ( false === @move_uploaded_file( $file['tmp_name'], $new_file ) ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'upload_failed' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'upload_failed' ) );
 		return $result;
 	}
 
 	// Make sure the uploaded file is only readable for the owner process
 	@chmod( $new_file, 0400 );
 
-	if ( $submission = WPCF7_Submission::get_instance() ) {
+	if ( $submission = wpcf8_Submission::get_instance() ) {
 		$submission->add_uploaded_file( $name, $new_file );
 	}
 
@@ -187,28 +190,28 @@ function wpcf7_file_validation_filter( $result, $tag ) {
 
 /* Messages */
 
-add_filter( 'wpcf7_messages', 'wpcf7_file_messages' );
+add_filter( 'wpcf8_messages', 'wpcf8_file_messages' );
 
-function wpcf7_file_messages( $messages ) {
+function wpcf8_file_messages( $messages ) {
 	return array_merge( $messages, array(
 		'upload_failed' => array(
 			'description' => __( "Uploading a file fails for any reason", 'contact-form-7' ),
-			'default' => __( 'Failed to upload file.', 'contact-form-7' )
+			'default' => __( "There was an unknown error uploading the file.", 'contact-form-7' )
 		),
 
 		'upload_file_type_invalid' => array(
-			'description' => __( "Uploaded file is not allowed file type", 'contact-form-7' ),
-			'default' => __( 'This file type is not allowed.', 'contact-form-7' )
+			'description' => __( "Uploaded file is not allowed for file type", 'contact-form-7' ),
+			'default' => __( "You are not allowed to upload files of this type.", 'contact-form-7' )
 		),
 
 		'upload_file_too_large' => array(
 			'description' => __( "Uploaded file is too large", 'contact-form-7' ),
-			'default' => __( 'This file is too large.', 'contact-form-7' )
+			'default' => __( "The file is too big.", 'contact-form-7' )
 		),
 
 		'upload_failed_php_error' => array(
 			'description' => __( "Uploading a file fails for PHP error", 'contact-form-7' ),
-			'default' => __( 'Failed to upload file. Error occurred.', 'contact-form-7' )
+			'default' => __( "There was an error uploading the file.", 'contact-form-7' )
 		)
 	) );
 }
@@ -216,21 +219,21 @@ function wpcf7_file_messages( $messages ) {
 
 /* Tag generator */
 
-add_action( 'wpcf7_admin_init', 'wpcf7_add_tag_generator_file', 50 );
+add_action( 'wpcf8_admin_init', 'wpcf8_add_tag_generator_file', 50 );
 
-function wpcf7_add_tag_generator_file() {
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+function wpcf8_add_tag_generator_file() {
+	$tag_generator = wpcf8_TagGenerator::get_instance();
 	$tag_generator->add( 'file', __( 'file', 'contact-form-7' ),
-		'wpcf7_tag_generator_file' );
+		'wpcf8_tag_generator_file' );
 }
 
-function wpcf7_tag_generator_file( $contact_form, $args = '' ) {
+function wpcf8_tag_generator_file( $contact_form, $args = '' ) {
 	$args = wp_parse_args( $args, array() );
 	$type = 'file';
 
 	$description = __( "Generate a form-tag for a file uploading field. For more details, see %s.", 'contact-form-7' );
 
-	$desc_link = wpcf7_link( __( 'http://contactform7.com/file-uploading-and-attachment/', 'contact-form-7' ), __( 'File Uploading and Attachment', 'contact-form-7' ) );
+	$desc_link = wpcf8_link( __( 'https://contactform7.com/file-uploading-and-attachment/', 'contact-form-7' ), __( 'File Uploading and Attachment', 'contact-form-7' ) );
 
 ?>
 <div class="control-box">
@@ -296,35 +299,35 @@ function wpcf7_tag_generator_file( $contact_form, $args = '' ) {
 
 /* Warning message */
 
-add_action( 'wpcf7_admin_notices', 'wpcf7_file_display_warning_message' );
+add_action( 'wpcf8_admin_warnings', 'wpcf8_file_display_warning_message' );
 
-function wpcf7_file_display_warning_message() {
-	if ( ! $contact_form = wpcf7_get_current_contact_form() ) {
+function wpcf8_file_display_warning_message() {
+	if ( ! $contact_form = wpcf8_get_current_contact_form() ) {
 		return;
 	}
 
-	$has_tags = (bool) $contact_form->form_scan_shortcode(
+	$has_tags = (bool) $contact_form->scan_form_tags(
 		array( 'type' => array( 'file', 'file*' ) ) );
 
 	if ( ! $has_tags ) {
 		return;
 	}
 
-	$uploads_dir = wpcf7_upload_tmp_dir();
-	wpcf7_init_uploads();
+	$uploads_dir = wpcf8_upload_tmp_dir();
+	wpcf8_init_uploads();
 
 	if ( ! is_dir( $uploads_dir ) || ! wp_is_writable( $uploads_dir ) ) {
 		$message = sprintf( __( 'This contact form contains file uploading fields, but the temporary folder for the files (%s) does not exist or is not writable. You can create the folder or change its permission manually.', 'contact-form-7' ), $uploads_dir );
 
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
+		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p></div>';
 	}
 }
 
 
 /* File uploading functions */
 
-function wpcf7_init_uploads() {
-	$dir = wpcf7_upload_tmp_dir();
+function wpcf8_init_uploads() {
+	$dir = wpcf8_upload_tmp_dir();
 	wp_mkdir_p( $dir );
 
 	$htaccess_file = trailingslashit( $dir ) . '.htaccess';
@@ -339,7 +342,7 @@ function wpcf7_init_uploads() {
 	}
 }
 
-function wpcf7_maybe_add_random_dir( $dir ) {
+function wpcf8_maybe_add_random_dir( $dir ) {
 	do {
 		$rand_max = mt_getrandmax();
 		$rand = zeroise( mt_rand( 0, $rand_max ), strlen( $rand_max ) );
@@ -353,26 +356,30 @@ function wpcf7_maybe_add_random_dir( $dir ) {
 	return $dir;
 }
 
-function wpcf7_upload_tmp_dir() {
-	if ( defined( 'WPCF7_UPLOADS_TMP_DIR' ) )
-		return WPCF7_UPLOADS_TMP_DIR;
+function wpcf8_upload_tmp_dir() {
+	if ( defined( 'wpcf8_UPLOADS_TMP_DIR' ) )
+		return wpcf8_UPLOADS_TMP_DIR;
 	else
-		return wpcf7_upload_dir( 'dir' ) . '/wpcf7_uploads';
+		return wpcf8_upload_dir( 'dir' ) . '/wpcf8_uploads';
 }
 
-add_action( 'template_redirect', 'wpcf7_cleanup_upload_files', 20 );
+add_action( 'template_redirect', 'wpcf8_cleanup_upload_files', 20 );
 
-function wpcf7_cleanup_upload_files() {
+function wpcf8_cleanup_upload_files( $seconds = 60, $max = 100 ) {
 	if ( is_admin() || 'GET' != $_SERVER['REQUEST_METHOD']
 	|| is_robots() || is_feed() || is_trackback() ) {
 		return;
 	}
 
-	$dir = trailingslashit( wpcf7_upload_tmp_dir() );
+	$dir = trailingslashit( wpcf8_upload_tmp_dir() );
 
 	if ( ! is_dir( $dir ) || ! is_readable( $dir ) || ! wp_is_writable( $dir ) ) {
 		return;
 	}
+
+	$seconds = absint( $seconds );
+	$max = absint( $max );
+	$count = 0;
 
 	if ( $handle = @opendir( $dir ) ) {
 		while ( false !== ( $file = readdir( $handle ) ) ) {
@@ -382,11 +389,16 @@ function wpcf7_cleanup_upload_files() {
 
 			$mtime = @filemtime( $dir . $file );
 
-			if ( $mtime && time() < $mtime + 60 ) { // less than 60 secs old
+			if ( $mtime && time() < $mtime + $seconds ) { // less than $seconds old
 				continue;
 			}
 
-			wpcf7_rmdir_p( path_join( $dir, $file ) );
+			wpcf8_rmdir_p( path_join( $dir, $file ) );
+			$count += 1;
+
+			if ( $max <= $count ) {
+				break;
+			}
 		}
 
 		closedir( $handle );
