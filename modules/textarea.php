@@ -3,27 +3,29 @@
 ** A base module for [textarea] and [textarea*]
 **/
 
-/* Shortcode handler */
+/* form_tag handler */
 
-add_action( 'wpcf7_init', 'wpcf7_add_shortcode_textarea' );
+add_action( 'wpcf8_init', 'wpcf8_add_form_tag_textarea' );
 
-function wpcf7_add_shortcode_textarea() {
-	wpcf7_add_shortcode( array( 'textarea', 'textarea*' ),
-		'wpcf7_textarea_shortcode_handler', true );
+function wpcf8_add_form_tag_textarea() {
+	wpcf8_add_form_tag( array( 'textarea', 'textarea*' ),
+		'wpcf8_textarea_form_tag_handler', array( 'name-attr' => true ) );
 }
 
-function wpcf7_textarea_shortcode_handler( $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_textarea_form_tag_handler( $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
-	if ( empty( $tag->name ) )
+	if ( empty( $tag->name ) ) {
 		return '';
+	}
 
-	$validation_error = wpcf7_get_validation_error( $tag->name );
+	$validation_error = wpcf8_get_validation_error( $tag->name );
 
-	$class = wpcf7_form_controls_class( $tag->type );
+	$class = wpcf8_form_controls_class( $tag->type );
 
-	if ( $validation_error )
-		$class .= ' wpcf7-not-valid';
+	if ( $validation_error ) {
+		$class .= ' wpcf8-not-valid';
+	}
 
 	$atts = array();
 
@@ -39,6 +41,9 @@ function wpcf7_textarea_shortcode_handler( $tag ) {
 	$atts['class'] = $tag->get_class_option( $class );
 	$atts['id'] = $tag->get_id_option();
 	$atts['tabindex'] = $tag->get_option( 'tabindex', 'int', true );
+
+	$atts['autocomplete'] = $tag->get_option( 'autocomplete',
+		'[-0-9a-zA-Z]+', true );
 
 	if ( $tag->has_option( 'readonly' ) ) {
 		$atts['readonly'] = 'readonly';
@@ -61,14 +66,14 @@ function wpcf7_textarea_shortcode_handler( $tag ) {
 
 	$value = $tag->get_default_option( $value );
 
-	$value = wpcf7_get_hangover( $tag->name, $value );
+	$value = wpcf8_get_hangover( $tag->name, $value );
 
 	$atts['name'] = $tag->name;
 
-	$atts = wpcf7_format_atts( $atts );
+	$atts = wpcf8_format_atts( $atts );
 
 	$html = sprintf(
-		'<span class="wpcf7-form-control-wrap %1$s"><textarea %2$s>%3$s</textarea>%4$s</span>',
+		'<span class="wpcf8-form-control-wrap %1$s"><textarea %2$s>%3$s</textarea>%4$s</span>',
 		sanitize_html_class( $tag->name ), $atts,
 		esc_textarea( $value ), $validation_error );
 
@@ -78,11 +83,11 @@ function wpcf7_textarea_shortcode_handler( $tag ) {
 
 /* Validation filter */
 
-add_filter( 'wpcf7_validate_textarea', 'wpcf7_textarea_validation_filter', 10, 2 );
-add_filter( 'wpcf7_validate_textarea*', 'wpcf7_textarea_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_textarea', 'wpcf8_textarea_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_textarea*', 'wpcf8_textarea_validation_filter', 10, 2 );
 
-function wpcf7_textarea_validation_filter( $result, $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_textarea_validation_filter( $result, $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
 	$type = $tag->type;
 	$name = $tag->name;
@@ -90,10 +95,10 @@ function wpcf7_textarea_validation_filter( $result, $tag ) {
 	$value = isset( $_POST[$name] ) ? (string) $_POST[$name] : '';
 
 	if ( $tag->is_required() && '' == $value ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'invalid_required' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'invalid_required' ) );
 	}
 
-	if ( ! empty( $value ) ) {
+	if ( '' !== $value ) {
 		$maxlength = $tag->get_maxlength_option();
 		$minlength = $tag->get_minlength_option();
 
@@ -101,13 +106,13 @@ function wpcf7_textarea_validation_filter( $result, $tag ) {
 			$maxlength = $minlength = null;
 		}
 
-		$code_units = wpcf7_count_code_units( $value );
+		$code_units = wpcf8_count_code_units( stripslashes( $value ) );
 
 		if ( false !== $code_units ) {
 			if ( $maxlength && $maxlength < $code_units ) {
-				$result->invalidate( $tag, wpcf7_get_message( 'invalid_too_long' ) );
+				$result->invalidate( $tag, wpcf8_get_message( 'invalid_too_long' ) );
 			} elseif ( $minlength && $code_units < $minlength ) {
-				$result->invalidate( $tag, wpcf7_get_message( 'invalid_too_short' ) );
+				$result->invalidate( $tag, wpcf8_get_message( 'invalid_too_short' ) );
 			}
 		}
 	}
@@ -118,21 +123,21 @@ function wpcf7_textarea_validation_filter( $result, $tag ) {
 
 /* Tag generator */
 
-add_action( 'wpcf7_admin_init', 'wpcf7_add_tag_generator_textarea', 20 );
+add_action( 'wpcf8_admin_init', 'wpcf8_add_tag_generator_textarea', 20 );
 
-function wpcf7_add_tag_generator_textarea() {
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+function wpcf8_add_tag_generator_textarea() {
+	$tag_generator = wpcf8_TagGenerator::get_instance();
 	$tag_generator->add( 'textarea', __( 'text area', 'contact-form-7' ),
-		'wpcf7_tag_generator_textarea' );
+		'wpcf8_tag_generator_textarea' );
 }
 
-function wpcf7_tag_generator_textarea( $contact_form, $args = '' ) {
+function wpcf8_tag_generator_textarea( $contact_form, $args = '' ) {
 	$args = wp_parse_args( $args, array() );
 	$type = 'textarea';
 
 	$description = __( "Generate a form-tag for a multi-line text input field. For more details, see %s.", 'contact-form-7' );
 
-	$desc_link = wpcf7_link( __( 'http://contactform7.com/text-fields/', 'contact-form-7' ), __( 'Text Fields', 'contact-form-7' ) );
+	$desc_link = wpcf8_link( __( 'https://contactform7.com/text-fields/', 'contact-form-7' ), __( 'Text Fields', 'contact-form-7' ) );
 
 ?>
 <div class="control-box">
