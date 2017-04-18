@@ -265,7 +265,7 @@ function wpcf8_load_contact_form_admin() {
 		$help_tabs->set_help_tabs( 'list' );
 
 		if ( ! class_exists( 'wpcf8_Contact_Form_List_Table' ) ) {
-			require_once wpcf8_PLUGIN_DIR . '/admin/includes/class-contact-forms-list-table.php';
+			require_once WPCF8_PLUGIN_DIR . '/admin/includes/class-contact-forms-list-table.php';
 		}
 
 		add_filter( 'manage_' . $current_screen->id . '_columns',
