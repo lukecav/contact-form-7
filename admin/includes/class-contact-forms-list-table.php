@@ -9,10 +9,10 @@ class WPCF7_Contact_Form_List_Table extends WP_List_Table {
 	public static function define_columns() {
 		$columns = array(
 			'cb' => '<input type="checkbox" />',
-			'title' => __( 'Title', 'contact-form-7' ),
-			'shortcode' => __( 'Shortcode', 'contact-form-7' ),
-			'author' => __( 'Author', 'contact-form-7' ),
-			'date' => __( 'Date', 'contact-form-7' ),
+			'title' => __( 'Title', 'contact-form-8' ),
+			'shortcode' => __( 'Shortcode', 'contact-form-8' ),
+			'author' => __( 'Author', 'contact-form-8' ),
+			'date' => __( 'Date', 'contact-form-8' ),
 		);
 
 		return $columns;
