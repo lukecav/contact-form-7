@@ -343,8 +343,8 @@ function wpcf8_admin_management_page() {
 	if ( $post = wpcf8_get_current_contact_form() ) {
 		$post_id = $post->initial() ? -1 : $post->id();
 
-		require_once wpcf8_PLUGIN_DIR . '/admin/includes/editor.php';
-		require_once wpcf8_PLUGIN_DIR . '/admin/edit-contact-form.php';
+		require_once WPCF8_PLUGIN_DIR . '/admin/includes/editor.php';
+		require_once WPCF8_PLUGIN_DIR . '/admin/edit-contact-form.php';
 		return;
 	}
 
