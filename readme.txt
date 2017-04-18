@@ -1,7 +1,7 @@
 === Contact Form 8 ===
 Contributors: takayukister
 Donate link: https://github.com/lukecav/contact-form-8
-Tags: contact, form, contact form, feedback, email, ajax, captcha, akismet, multilingual
+Tags: contact, form, contact form, feedback, email, ajax, captcha, akismet, multilingual, forked, humor
 Requires at least: 4.6
 Tested up to: 4.7.4
 Stable tag: 4.7
