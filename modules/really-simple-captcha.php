@@ -3,30 +3,32 @@
 ** A base module for [captchac] and [captchar]
 **/
 
-/* Shortcode handler */
+/* form_tag handler */
 
-add_action( 'wpcf7_init', 'wpcf7_add_shortcode_captcha' );
+add_action( 'wpcf8_init', 'wpcf8_add_form_tag_captcha' );
 
-function wpcf7_add_shortcode_captcha() {
-	wpcf7_add_shortcode( array( 'captchac', 'captchar' ),
-		'wpcf7_captcha_shortcode_handler', true );
+function wpcf8_add_form_tag_captcha() {
+	wpcf8_add_form_tag( array( 'captchac', 'captchar' ),
+		'wpcf8_captcha_form_tag_handler', array( 'name-attr' => true ) );
 }
 
-function wpcf7_captcha_shortcode_handler( $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_captcha_form_tag_handler( $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
-	if ( 'captchac' == $tag->type && ! class_exists( 'ReallySimpleCaptcha' ) )
+	if ( 'captchac' == $tag->type && ! class_exists( 'ReallySimpleCaptcha' ) ) {
 		return '<em>' . __( 'To use CAPTCHA, you need <a href="http://wordpress.org/extend/plugins/really-simple-captcha/">Really Simple CAPTCHA</a> plugin installed.', 'contact-form-7' ) . '</em>';
+	}
 
-	if ( empty( $tag->name ) )
+	if ( empty( $tag->name ) ) {
 		return '';
+	}
 
-	$validation_error = wpcf7_get_validation_error( $tag->name );
+	$validation_error = wpcf8_get_validation_error( $tag->name );
 
-	$class = wpcf7_form_controls_class( $tag->type );
+	$class = wpcf8_form_controls_class( $tag->type );
 
 	if ( 'captchac' == $tag->type ) { // CAPTCHA-Challenge (image)
-		$class .= ' wpcf7-captcha-' . $tag->name;
+		$class .= ' wpcf8-captcha-' . $tag->name;
 
 		$atts = array();
 
@@ -39,35 +41,39 @@ function wpcf7_captcha_shortcode_handler( $tag ) {
 			'font_size' => 14,
 			'font_char_width' => 15 );
 
-		$op = array_merge( $op, wpcf7_captchac_options( $tag->options ) );
+		$op = array_merge( $op, wpcf8_captchac_options( $tag->options ) );
 
-		if ( ! $filename = wpcf7_generate_captcha( $op ) )
+		if ( ! $filename = wpcf8_generate_captcha( $op ) ) {
 			return '';
+		}
 
 		if ( ! empty( $op['img_size'] ) ) {
-			if ( isset( $op['img_size'][0] ) )
+			if ( isset( $op['img_size'][0] ) ) {
 				$atts['width'] = $op['img_size'][0];
+			}
 
-			if ( isset( $op['img_size'][1] ) )
+			if ( isset( $op['img_size'][1] ) ) {
 				$atts['height'] = $op['img_size'][1];
+			}
 		}
 
 		$atts['alt'] = 'captcha';
-		$atts['src'] = wpcf7_captcha_url( $filename );
+		$atts['src'] = wpcf8_captcha_url( $filename );
 
-		$atts = wpcf7_format_atts( $atts );
+		$atts = wpcf8_format_atts( $atts );
 
 		$prefix = substr( $filename, 0, strrpos( $filename, '.' ) );
 
 		$html = sprintf(
-			'<input type="hidden" name="_wpcf7_captcha_challenge_%1$s" value="%2$s" /><img %3$s />',
+			'<input type="hidden" name="_wpcf8_captcha_challenge_%1$s" value="%2$s" /><img %3$s />',
 			$tag->name, $prefix, $atts );
 
 		return $html;
 
 	} elseif ( 'captchar' == $tag->type ) { // CAPTCHA-Response (input)
-		if ( $validation_error )
-			$class .= ' wpcf7-not-valid';
+		if ( $validation_error ) {
+			$class .= ' wpcf8-not-valid';
+		}
 
 		$atts = array();
 
@@ -83,15 +89,17 @@ function wpcf7_captcha_shortcode_handler( $tag ) {
 		$atts['class'] = $tag->get_class_option( $class );
 		$atts['id'] = $tag->get_id_option();
 		$atts['tabindex'] = $tag->get_option( 'tabindex', 'int', true );
-
+		$atts['autocomplete'] = 'off';
 		$atts['aria-invalid'] = $validation_error ? 'true' : 'false';
 
 		$value = (string) reset( $tag->values );
 
-		if ( wpcf7_is_posted() )
+		if ( wpcf8_is_posted() ) {
 			$value = '';
+		}
 
-		if ( $tag->has_option( 'placeholder' ) || $tag->has_option( 'watermark' ) ) {
+		if ( $tag->has_option( 'placeholder' )
+		|| $tag->has_option( 'watermark' ) ) {
 			$atts['placeholder'] = $value;
 			$value = '';
 		}
@@ -100,10 +108,10 @@ function wpcf7_captcha_shortcode_handler( $tag ) {
 		$atts['type'] = 'text';
 		$atts['name'] = $tag->name;
 
-		$atts = wpcf7_format_atts( $atts );
+		$atts = wpcf8_format_atts( $atts );
 
 		$html = sprintf(
-			'<span class="wpcf7-form-control-wrap %1$s"><input %2$s />%3$s</span>',
+			'<span class="wpcf8-form-control-wrap %1$s"><input %2$s />%3$s</span>',
 			sanitize_html_class( $tag->name ), $atts, $validation_error );
 
 		return $html;
@@ -113,26 +121,26 @@ function wpcf7_captcha_shortcode_handler( $tag ) {
 
 /* Validation filter */
 
-add_filter( 'wpcf7_validate_captchar', 'wpcf7_captcha_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_captchar', 'wpcf8_captcha_validation_filter', 10, 2 );
 
-function wpcf7_captcha_validation_filter( $result, $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_captcha_validation_filter( $result, $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
 	$type = $tag->type;
 	$name = $tag->name;
 
-	$captchac = '_wpcf7_captcha_challenge_' . $name;
+	$captchac = '_wpcf8_captcha_challenge_' . $name;
 
 	$prefix = isset( $_POST[$captchac] ) ? (string) $_POST[$captchac] : '';
 	$response = isset( $_POST[$name] ) ? (string) $_POST[$name] : '';
-	$response = wpcf7_canonicalize( $response );
+	$response = wpcf8_canonicalize( $response );
 
-	if ( 0 == strlen( $prefix ) || ! wpcf7_check_captcha( $prefix, $response ) ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'captcha_not_match' ) );
+	if ( 0 == strlen( $prefix ) || ! wpcf8_check_captcha( $prefix, $response ) ) {
+		$result->invalidate( $tag, wpcf8_get_message( 'captcha_not_match' ) );
 	}
 
 	if ( 0 != strlen( $prefix ) ) {
-		wpcf7_remove_captcha( $prefix );
+		wpcf8_remove_captcha( $prefix );
 	}
 
 	return $result;
@@ -141,14 +149,14 @@ function wpcf7_captcha_validation_filter( $result, $tag ) {
 
 /* Ajax echo filter */
 
-add_filter( 'wpcf7_ajax_onload', 'wpcf7_captcha_ajax_refill' );
-add_filter( 'wpcf7_ajax_json_echo', 'wpcf7_captcha_ajax_refill' );
+add_filter( 'wpcf8_ajax_onload', 'wpcf8_captcha_ajax_refill' );
+add_filter( 'wpcf8_ajax_json_echo', 'wpcf8_captcha_ajax_refill' );
 
-function wpcf7_captcha_ajax_refill( $items ) {
+function wpcf8_captcha_ajax_refill( $items ) {
 	if ( ! is_array( $items ) )
 		return $items;
 
-	$fes = wpcf7_scan_shortcode( array( 'type' => 'captchac' ) );
+	$fes = wpcf8_scan_form_tags( array( 'type' => 'captchac' ) );
 
 	if ( empty( $fes ) )
 		return $items;
@@ -162,9 +170,9 @@ function wpcf7_captcha_ajax_refill( $items ) {
 		if ( empty( $name ) )
 			continue;
 
-		$op = wpcf7_captchac_options( $options );
-		if ( $filename = wpcf7_generate_captcha( $op ) ) {
-			$captcha_url = wpcf7_captcha_url( $filename );
+		$op = wpcf8_captchac_options( $options );
+		if ( $filename = wpcf8_generate_captcha( $op ) ) {
+			$captcha_url = wpcf8_captcha_url( $filename );
 			$refill[$name] = $captcha_url;
 		}
 	}
@@ -178,13 +186,9 @@ function wpcf7_captcha_ajax_refill( $items ) {
 
 /* Messages */
 
-add_filter( 'wpcf7_messages', 'wpcf7_captcha_messages' );
+add_filter( 'wpcf8_messages', 'wpcf8_captcha_messages' );
 
-function wpcf7_captcha_messages( $messages ) {
-	if ( ! wpcf7_use_really_simple_captcha() ) {
-		return $messages;
-	}
-
+function wpcf8_captcha_messages( $messages ) {
 	return array_merge( $messages, array( 'captcha_not_match' => array(
 		'description' => __( "The code that sender entered does not match the CAPTCHA", 'contact-form-7' ),
 		'default' => __( 'Your entered code is incorrect.', 'contact-form-7' )
@@ -194,27 +198,27 @@ function wpcf7_captcha_messages( $messages ) {
 
 /* Tag generator */
 
-add_action( 'wpcf7_admin_init', 'wpcf7_add_tag_generator_captcha', 46 );
+add_action( 'wpcf8_admin_init', 'wpcf8_add_tag_generator_captcha', 46 );
 
-function wpcf7_add_tag_generator_captcha() {
-	if ( ! wpcf7_use_really_simple_captcha() ) {
+function wpcf8_add_tag_generator_captcha() {
+	if ( ! wpcf8_use_really_simple_captcha() ) {
 		return;
 	}
 
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+	$tag_generator = wpcf8_TagGenerator::get_instance();
 	$tag_generator->add( 'captcha',
 		__( 'CAPTCHA (Really Simple CAPTCHA)', 'contact-form-7' ),
-		'wpcf7_tag_generator_captcha' );
+		'wpcf8_tag_generator_captcha' );
 }
 
-function wpcf7_tag_generator_captcha( $contact_form, $args = '' ) {
+function wpcf8_tag_generator_captcha( $contact_form, $args = '' ) {
 	$args = wp_parse_args( $args, array() );
 
 	if ( ! class_exists( 'ReallySimpleCaptcha' ) ) {
 ?>
 <div class="control-box">
 <fieldset>
-<legend><?php echo sprintf( esc_html( __( "To use CAPTCHA, you first need to install and activate %s plugin.", 'contact-form-7' ) ), wpcf7_link( 'http://wordpress.org/extend/plugins/really-simple-captcha/', 'Really Simple CAPTCHA' ) ); ?></legend>
+<legend><?php echo sprintf( esc_html( __( "To use CAPTCHA, you first need to install and activate %s plugin.", 'contact-form-7' ) ), wpcf8_link( 'http://wordpress.org/extend/plugins/really-simple-captcha/', 'Really Simple CAPTCHA' ) ); ?></legend>
 </fieldset>
 </div>
 <?php
@@ -224,7 +228,7 @@ function wpcf7_tag_generator_captcha( $contact_form, $args = '' ) {
 
 	$description = __( "Generate form-tags for a CAPTCHA image and corresponding response input field. For more details, see %s.", 'contact-form-7' );
 
-	$desc_link = wpcf7_link( __( 'http://contactform7.com/captcha/', 'contact-form-7' ), __( 'CAPTCHA', 'contact-form-7' ) );
+	$desc_link = wpcf8_link( __( 'https://contactform7.com/captcha/', 'contact-form-7' ), __( 'CAPTCHA', 'contact-form-7' ) );
 
 ?>
 <div class="control-box">
@@ -285,14 +289,14 @@ function wpcf7_tag_generator_captcha( $contact_form, $args = '' ) {
 
 /* Warning message */
 
-add_action( 'wpcf7_admin_notices', 'wpcf7_captcha_display_warning_message' );
+add_action( 'wpcf8_admin_warnings', 'wpcf8_captcha_display_warning_message' );
 
-function wpcf7_captcha_display_warning_message() {
-	if ( ! $contact_form = wpcf7_get_current_contact_form() ) {
+function wpcf8_captcha_display_warning_message() {
+	if ( ! $contact_form = wpcf8_get_current_contact_form() ) {
 		return;
 	}
 
-	$has_tags = (bool) $contact_form->form_scan_shortcode(
+	$has_tags = (bool) $contact_form->scan_form_tags(
 		array( 'type' => array( 'captchac' ) ) );
 
 	if ( ! $has_tags ) {
@@ -303,26 +307,26 @@ function wpcf7_captcha_display_warning_message() {
 		return;
 	}
 
-	$uploads_dir = wpcf7_captcha_tmp_dir();
-	wpcf7_init_captcha();
+	$uploads_dir = wpcf8_captcha_tmp_dir();
+	wpcf8_init_captcha();
 
 	if ( ! is_dir( $uploads_dir ) || ! wp_is_writable( $uploads_dir ) ) {
 		$message = sprintf( __( 'This contact form contains CAPTCHA fields, but the temporary folder for the files (%s) does not exist or is not writable. You can create the folder or change its permission manually.', 'contact-form-7' ), $uploads_dir );
 
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
+		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p></div>';
 	}
 
 	if ( ! function_exists( 'imagecreatetruecolor' ) || ! function_exists( 'imagettftext' ) ) {
 		$message = __( 'This contact form contains CAPTCHA fields, but the necessary libraries (GD and FreeType) are not available on your server.', 'contact-form-7' );
 
-		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $message ) . '</p></div>';
+		echo '<div class="notice notice-warning"><p>' . esc_html( $message ) . '</p></div>';
 	}
 }
 
 
 /* CAPTCHA functions */
 
-function wpcf7_init_captcha() {
+function wpcf8_init_captcha() {
 	static $captcha = null;
 
 	if ( $captcha ) {
@@ -335,7 +339,7 @@ function wpcf7_init_captcha() {
 		return false;
 	}
 
-	$dir = trailingslashit( wpcf7_captcha_tmp_dir() );
+	$dir = trailingslashit( wpcf8_captcha_tmp_dir() );
 
 	$captcha->tmp_dir = $dir;
 
@@ -371,32 +375,32 @@ function wpcf7_init_captcha() {
 	return $captcha;
 }
 
-function wpcf7_captcha_tmp_dir() {
-	if ( defined( 'WPCF7_CAPTCHA_TMP_DIR' ) )
-		return WPCF7_CAPTCHA_TMP_DIR;
+function wpcf8_captcha_tmp_dir() {
+	if ( defined( 'wpcf8_CAPTCHA_TMP_DIR' ) )
+		return wpcf8_CAPTCHA_TMP_DIR;
 	else
-		return wpcf7_upload_dir( 'dir' ) . '/wpcf7_captcha';
+		return wpcf8_upload_dir( 'dir' ) . '/wpcf8_captcha';
 }
 
-function wpcf7_captcha_tmp_url() {
-	if ( defined( 'WPCF7_CAPTCHA_TMP_URL' ) )
-		return WPCF7_CAPTCHA_TMP_URL;
+function wpcf8_captcha_tmp_url() {
+	if ( defined( 'wpcf8_CAPTCHA_TMP_URL' ) )
+		return wpcf8_CAPTCHA_TMP_URL;
 	else
-		return wpcf7_upload_dir( 'url' ) . '/wpcf7_captcha';
+		return wpcf8_upload_dir( 'url' ) . '/wpcf8_captcha';
 }
 
-function wpcf7_captcha_url( $filename ) {
-	$url = trailingslashit( wpcf7_captcha_tmp_url() ) . $filename;
+function wpcf8_captcha_url( $filename ) {
+	$url = trailingslashit( wpcf8_captcha_tmp_url() ) . $filename;
 
 	if ( is_ssl() && 'http:' == substr( $url, 0, 5 ) ) {
 		$url = 'https:' . substr( $url, 5 );
 	}
 
-	return apply_filters( 'wpcf7_captcha_url', esc_url_raw( $url ) );
+	return apply_filters( 'wpcf8_captcha_url', esc_url_raw( $url ) );
 }
 
-function wpcf7_generate_captcha( $options = null ) {
-	if ( ! $captcha = wpcf7_init_captcha() ) {
+function wpcf8_generate_captcha( $options = null ) {
+	if ( ! $captcha = wpcf8_init_captcha() ) {
 		return false;
 	}
 
@@ -433,16 +437,16 @@ function wpcf7_generate_captcha( $options = null ) {
 	return $captcha->generate_image( $prefix, $captcha_word );
 }
 
-function wpcf7_check_captcha( $prefix, $response ) {
-	if ( ! $captcha = wpcf7_init_captcha() ) {
+function wpcf8_check_captcha( $prefix, $response ) {
+	if ( ! $captcha = wpcf8_init_captcha() ) {
 		return false;
 	}
 
 	return $captcha->check( $prefix, $response );
 }
 
-function wpcf7_remove_captcha( $prefix ) {
-	if ( ! $captcha = wpcf7_init_captcha() ) {
+function wpcf8_remove_captcha( $prefix ) {
+	if ( ! $captcha = wpcf8_init_captcha() ) {
 		return false;
 	}
 
@@ -452,17 +456,17 @@ function wpcf7_remove_captcha( $prefix ) {
 	$captcha->remove( $prefix );
 }
 
-add_action( 'template_redirect', 'wpcf7_cleanup_captcha_files', 20 );
+add_action( 'template_redirect', 'wpcf8_cleanup_captcha_files', 20 );
 
-function wpcf7_cleanup_captcha_files() {
-	if ( ! $captcha = wpcf7_init_captcha() ) {
+function wpcf8_cleanup_captcha_files() {
+	if ( ! $captcha = wpcf8_init_captcha() ) {
 		return false;
 	}
 
 	if ( is_callable( array( $captcha, 'cleanup' ) ) )
 		return $captcha->cleanup();
 
-	$dir = trailingslashit( wpcf7_captcha_tmp_dir() );
+	$dir = trailingslashit( wpcf8_captcha_tmp_dir() );
 
 	if ( ! is_dir( $dir ) || ! is_readable( $dir ) || ! wp_is_writable( $dir ) )
 		return false;
@@ -480,7 +484,7 @@ function wpcf7_cleanup_captcha_files() {
 	}
 }
 
-function wpcf7_captchac_options( $options ) {
+function wpcf8_captchac_options( $options ) {
 	if ( ! is_array( $options ) )
 		return array();
 
