@@ -286,18 +286,18 @@ function wpcf8_admin_enqueue_scripts( $hook_suffix ) {
 
 	wp_enqueue_style( 'contact-form-8-admin',
 		wpcf8_plugin_url( 'admin/css/styles.css' ),
-		array(), wpcf8_VERSION, 'all' );
+		array(), WPCF_VERSION, 'all' );
 
 	if ( wpcf8_is_rtl() ) {
 		wp_enqueue_style( 'contact-form-8-admin-rtl',
 			wpcf8_plugin_url( 'admin/css/styles-rtl.css' ),
-			array(), wpcf8_VERSION, 'all' );
+			array(), WPCF8_VERSION, 'all' );
 	}
 
 	wp_enqueue_script( 'wpcf8-admin',
 		wpcf8_plugin_url( 'admin/js/scripts.js' ),
 		array( 'jquery', 'jquery-ui-tabs' ),
-		wpcf8_VERSION, true );
+		WPCF8_VERSION, true );
 
 	$args = array(
 		'apiSettings' => array(
@@ -336,7 +336,7 @@ function wpcf8_admin_enqueue_scripts( $hook_suffix ) {
 
 	wp_enqueue_script( 'wpcf8-admin-taggenerator',
 		wpcf8_plugin_url( 'admin/js/tag-generator.js' ),
-		array( 'jquery', 'thickbox', 'wpcf8-admin' ), wpcf8_VERSION, true );
+		array( 'jquery', 'thickbox', 'wpcf8-admin' ), WPCF8_VERSION, true );
 }
 
 function wpcf8_admin_management_page() {
