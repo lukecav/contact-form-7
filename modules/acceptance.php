@@ -3,30 +3,33 @@
 ** A base module for [acceptance]
 **/
 
-/* Shortcode handler */
+/* form_tag handler */
 
-add_action( 'wpcf7_init', 'wpcf7_add_shortcode_acceptance' );
+add_action( 'wpcf8_init', 'wpcf8_add_form_tag_acceptance' );
 
-function wpcf7_add_shortcode_acceptance() {
-	wpcf7_add_shortcode( 'acceptance',
-		'wpcf7_acceptance_shortcode_handler', true );
+function wpcf8_add_form_tag_acceptance() {
+	wpcf8_add_form_tag( 'acceptance',
+		'wpcf8_acceptance_form_tag_handler', array( 'name-attr' => true ) );
 }
 
-function wpcf7_acceptance_shortcode_handler( $tag ) {
-	$tag = new WPCF7_Shortcode( $tag );
+function wpcf8_acceptance_form_tag_handler( $tag ) {
+	$tag = new wpcf8_FormTag( $tag );
 
-	if ( empty( $tag->name ) )
+	if ( empty( $tag->name ) ) {
 		return '';
+	}
 
-	$validation_error = wpcf7_get_validation_error( $tag->name );
+	$validation_error = wpcf8_get_validation_error( $tag->name );
 
-	$class = wpcf7_form_controls_class( $tag->type );
+	$class = wpcf8_form_controls_class( $tag->type );
 
-	if ( $validation_error )
-		$class .= ' wpcf7-not-valid';
+	if ( $validation_error ) {
+		$class .= ' wpcf8-not-valid';
+	}
 
-	if ( $tag->has_option( 'invert' ) )
-		$class .= ' wpcf7-invert';
+	if ( $tag->has_option( 'invert' ) ) {
+		$class .= ' wpcf8-invert';
+	}
 
 	$atts = array();
 
@@ -34,8 +37,9 @@ function wpcf7_acceptance_shortcode_handler( $tag ) {
 	$atts['id'] = $tag->get_id_option();
 	$atts['tabindex'] = $tag->get_option( 'tabindex', 'int', true );
 
-	if ( $tag->has_option( 'default:on' ) )
+	if ( $tag->has_option( 'default:on' ) ) {
 		$atts['checked'] = 'checked';
+	}
 
 	$atts['aria-invalid'] = $validation_error ? 'true' : 'false';
 
@@ -43,10 +47,10 @@ function wpcf7_acceptance_shortcode_handler( $tag ) {
 	$atts['name'] = $tag->name;
 	$atts['value'] = '1';
 
-	$atts = wpcf7_format_atts( $atts );
+	$atts = wpcf8_format_atts( $atts );
 
 	$html = sprintf(
-		'<span class="wpcf7-form-control-wrap %1$s"><input %2$s />%3$s</span>',
+		'<span class="wpcf8-form-control-wrap %1$s"><input %2$s />%3$s</span>',
 		sanitize_html_class( $tag->name ), $atts, $validation_error );
 
 	return $html;
@@ -55,13 +59,14 @@ function wpcf7_acceptance_shortcode_handler( $tag ) {
 
 /* Validation filter */
 
-add_filter( 'wpcf7_validate_acceptance', 'wpcf7_acceptance_validation_filter', 10, 2 );
+add_filter( 'wpcf8_validate_acceptance', 'wpcf8_acceptance_validation_filter', 10, 2 );
 
-function wpcf7_acceptance_validation_filter( $result, $tag ) {
-	if ( ! wpcf7_acceptance_as_validation() )
+function wpcf8_acceptance_validation_filter( $result, $tag ) {
+	if ( ! wpcf8_acceptance_as_validation() ) {
 		return $result;
+	}
 
-	$tag = new WPCF7_Shortcode( $tag );
+	$tag = new wpcf8_FormTag( $tag );
 
 	$name = $tag->name;
 	$value = ( ! empty( $_POST[$name] ) ? 1 : 0 );
@@ -69,7 +74,7 @@ function wpcf7_acceptance_validation_filter( $result, $tag ) {
 	$invert = $tag->has_option( 'invert' );
 
 	if ( $invert && $value || ! $invert && ! $value ) {
-		$result->invalidate( $tag, wpcf7_get_message( 'accept_terms' ) );
+		$result->invalidate( $tag, wpcf8_get_message( 'accept_terms' ) );
 	}
 
 	return $result;
@@ -78,13 +83,13 @@ function wpcf7_acceptance_validation_filter( $result, $tag ) {
 
 /* Acceptance filter */
 
-add_filter( 'wpcf7_acceptance', 'wpcf7_acceptance_filter' );
+add_filter( 'wpcf8_acceptance', 'wpcf8_acceptance_filter' );
 
-function wpcf7_acceptance_filter( $accepted ) {
+function wpcf8_acceptance_filter( $accepted ) {
 	if ( ! $accepted )
 		return $accepted;
 
-	$fes = wpcf7_scan_shortcode( array( 'type' => 'acceptance' ) );
+	$fes = wpcf8_scan_form_tags( array( 'type' => 'acceptance' ) );
 
 	foreach ( $fes as $fe ) {
 		$name = $fe['name'];
@@ -104,17 +109,17 @@ function wpcf7_acceptance_filter( $accepted ) {
 	return $accepted;
 }
 
-add_filter( 'wpcf7_form_class_attr', 'wpcf7_acceptance_form_class_attr' );
+add_filter( 'wpcf8_form_class_attr', 'wpcf8_acceptance_form_class_attr' );
 
-function wpcf7_acceptance_form_class_attr( $class ) {
-	if ( wpcf7_acceptance_as_validation() )
-		return $class . ' wpcf7-acceptance-as-validation';
+function wpcf8_acceptance_form_class_attr( $class ) {
+	if ( wpcf8_acceptance_as_validation() )
+		return $class . ' wpcf8-acceptance-as-validation';
 
 	return $class;
 }
 
-function wpcf7_acceptance_as_validation() {
-	if ( ! $contact_form = wpcf7_get_current_contact_form() )
+function wpcf8_acceptance_as_validation() {
+	if ( ! $contact_form = wpcf8_get_current_contact_form() )
 		return false;
 
 	return $contact_form->is_true( 'acceptance_as_validation' );
@@ -123,21 +128,21 @@ function wpcf7_acceptance_as_validation() {
 
 /* Tag generator */
 
-add_action( 'wpcf7_admin_init', 'wpcf7_add_tag_generator_acceptance', 35 );
+add_action( 'wpcf8_admin_init', 'wpcf8_add_tag_generator_acceptance', 35 );
 
-function wpcf7_add_tag_generator_acceptance() {
-	$tag_generator = WPCF7_TagGenerator::get_instance();
+function wpcf8_add_tag_generator_acceptance() {
+	$tag_generator = wpcf8_TagGenerator::get_instance();
 	$tag_generator->add( 'acceptance', __( 'acceptance', 'contact-form-7' ),
-		'wpcf7_tag_generator_acceptance' );
+		'wpcf8_tag_generator_acceptance' );
 }
 
-function wpcf7_tag_generator_acceptance( $contact_form, $args = '' ) {
+function wpcf8_tag_generator_acceptance( $contact_form, $args = '' ) {
 	$args = wp_parse_args( $args, array() );
 	$type = 'acceptance';
 
 	$description = __( "Generate a form-tag for an acceptance checkbox. For more details, see %s.", 'contact-form-7' );
 
-	$desc_link = wpcf7_link( __( 'http://contactform7.com/acceptance-checkbox/', 'contact-form-7' ), __( 'Acceptance Checkbox', 'contact-form-7' ) );
+	$desc_link = wpcf8_link( __( 'https://contactform7.com/acceptance-checkbox/', 'contact-form-7' ), __( 'Acceptance Checkbox', 'contact-form-7' ) );
 
 ?>
 <div class="control-box">
