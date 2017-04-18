@@ -4,17 +4,17 @@
 ** Listo http://wordpress.org/plugins/listo/
 **/
 
-add_filter( 'wpcf7_form_tag_data_option', 'wpcf7_listo', 10, 3 );
+add_filter( 'wpcf8_form_tag_data_option', 'wpcf8_listo', 10, 3 );
 
-function wpcf7_listo( $data, $options, $args ) {
+function wpcf8_listo( $data, $options, $args ) {
 	if ( ! function_exists( 'listo' ) ) {
 		return $data;
 	}
 
 	$args = wp_parse_args( $args, array() );
 
-	$contact_form = wpcf7_get_current_contact_form();
-	$args['locale'] = $contact_form->locale;
+	$contact_form = wpcf8_get_current_contact_form();
+	$args['locale'] = $contact_form->locale();
 
 	foreach ( (array) $options as $option ) {
 		$option = explode( '.', $option );
@@ -28,5 +28,3 @@ function wpcf7_listo( $data, $options, $args ) {
 
 	return $data;
 }
-
-?>
