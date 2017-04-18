@@ -373,7 +373,9 @@ function wpcf8_admin_management_page() {
 			. __( 'Search results for &#8220;%s&#8221;', 'contact-form-8' )
 			. '</span>', esc_html( $_REQUEST['s'] ) );
 	}
-?></h1>
+?>
+
+<hr class="wp-header-end">
 
 <?php do_action( 'wpcf8_admin_warnings' ); ?>
 <?php wpcf8_welcome_panel(); ?>
