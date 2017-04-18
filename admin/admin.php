@@ -428,8 +428,8 @@ function wpcf8_admin_add_new_page() {
 
 	$post_id = -1;
 
-	require_once wpcf8_PLUGIN_DIR . '/admin/includes/editor.php';
-	require_once wpcf8_PLUGIN_DIR . '/admin/edit-contact-form.php';
+	require_once WPCF8_PLUGIN_DIR . '/admin/includes/editor.php';
+	require_once WPCF8_PLUGIN_DIR . '/admin/edit-contact-form.php';
 }
 
 function wpcf8_load_integration_page() {
