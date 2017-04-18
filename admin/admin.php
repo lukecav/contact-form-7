@@ -1,9 +1,9 @@
 <?php
 
-require_once WPFC8_PLUGIN_DIR . '/admin/includes/admin-functions.php';
-require_once WPFC8_PLUGIN_DIR . '/admin/includes/help-tabs.php';
-require_once WPFC8_PLUGIN_DIR . '/admin/includes/tag-generator.php';
-require_once WPFC8_PLUGIN_DIR . '/admin/includes/welcome-panel.php';
+require_once WPCF8_PLUGIN_DIR . '/admin/includes/admin-functions.php';
+require_once WPCF8_PLUGIN_DIR . '/admin/includes/help-tabs.php';
+require_once WPCF8_PLUGIN_DIR . '/admin/includes/tag-generator.php';
+require_once WPCF8_PLUGIN_DIR . '/admin/includes/welcome-panel.php';
 
 add_action( 'admin_init', 'wpcf8_admin_init' );
 
