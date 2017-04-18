@@ -526,7 +526,7 @@ function wpcf8_admin_updated_message() {
 add_filter( 'plugin_action_links', 'wpcf8_plugin_action_links', 10, 2 );
 
 function wpcf8_plugin_action_links( $links, $file ) {
-	if ( $file != wpcf8_PLUGIN_BASENAME ) {
+	if ( $file != WPCF8_PLUGIN_BASENAME ) {
 		return $links;
 	}
 
