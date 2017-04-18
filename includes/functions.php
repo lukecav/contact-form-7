@@ -103,12 +103,12 @@ function wpcf8_support_html5_fallback() {
 
 function wpcf8_use_really_simple_captcha() {
 	return apply_filters( 'wpcf8_use_really_simple_captcha',
-		wpcf8_USE_REALLY_SIMPLE_CAPTCHA );
+			WPCF8_USE_REALLY_SIMPLE_CAPTCHA );
 }
 
 function wpcf8_validate_configuration() {
 	return apply_filters( 'wpcf8_validate_configuration',
-		wpcf8_VALIDATE_CONFIGURATION );
+		WPCF8_VALIDATE_CONFIGURATION );
 }
 
 function wpcf8_load_js() {
