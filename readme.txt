@@ -8,7 +8,7 @@ Stable tag: 4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Just another contact form plugin. Simple but flexible.
+Just another contact form plugin. Simple but flexible. Based on the plugin work by Takayuki Miyoshi. https://wordpress.org/plugins/contact-form-7/
 
 == Description ==
 
